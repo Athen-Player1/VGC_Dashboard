@@ -24,7 +24,10 @@ export default async function TeamDetailPage({
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-            <Link className="font-label text-[11px] font-bold uppercase tracking-[0.32em] text-[var(--secondary)]" href="/teams">
+            <Link
+              className="font-label text-[11px] font-bold uppercase tracking-[0.32em] text-[var(--secondary)]"
+              href="/teams"
+            >
               Back to Teams
             </Link>
             <h1 className="mt-2 font-headline text-4xl font-extrabold tracking-tight">
@@ -35,10 +38,16 @@ export default async function TeamDetailPage({
             </p>
           </div>
           <div className="flex gap-3">
-            <Link className="rounded-2xl bg-[var(--secondary-fixed)] px-5 py-3 font-headline text-sm font-bold text-[var(--secondary)]" href="/analysis">
+            <Link
+              className="rounded-2xl bg-[var(--secondary-fixed)] px-5 py-3 font-headline text-sm font-bold text-[var(--secondary)]"
+              href={`/analysis?team=${team.id}`}
+            >
               Run Analysis
             </Link>
-            <Link className="rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-container)] px-6 py-3 font-headline text-sm font-bold text-white" href="/meta">
+            <Link
+              className="rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-container)] px-6 py-3 font-headline text-sm font-bold text-white"
+              href="/meta"
+            >
               Compare to Meta
             </Link>
           </div>
@@ -74,7 +83,9 @@ export default async function TeamDetailPage({
                 <div className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
                   Role
                 </div>
-                <p className="mt-2 text-sm font-semibold text-[var(--on-surface)]">{member.role}</p>
+                <p className="mt-2 text-sm font-semibold text-[var(--on-surface)]">
+                  {member.role}
+                </p>
               </div>
               <div className="mt-5">
                 <div className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">

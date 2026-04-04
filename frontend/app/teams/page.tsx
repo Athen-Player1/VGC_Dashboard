@@ -99,7 +99,7 @@ export default async function TeamsPage({
                 </Link>
                 <Link
                   className="rounded-xl bg-[var(--secondary-fixed)] px-4 py-2.5 font-headline text-sm font-bold text-[var(--secondary)]"
-                  href="/analysis"
+                  href={`/analysis?team=${team.id}`}
                 >
                   Analyze
                 </Link>

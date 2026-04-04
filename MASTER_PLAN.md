@@ -44,11 +44,13 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Builder validation added for incomplete slots, duplicate species, and move/type limits
 - First deterministic team analysis endpoint added for saved teams
 - Team detail pages now surface structural analysis results from the API
+- Dedicated Analysis page now loads and compares a selected saved team using the same analysis engine
 
 ### In Progress
 
 - Builder UX polish is underway so editing feels closer to a real drafting workflow
 - Expanding the deterministic analysis engine beyond the first structural pass
+- Reusing analysis outputs across more product surfaces before meta snapshot work begins
 
 ### Not Started
 
@@ -74,6 +76,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Parse Showdown exports
 - Save imported Showdown teams
 - Load deterministic structural analysis on each saved team detail page
+- Open the dedicated Analysis desk for a specific saved team
 - Run app in Docker
 - Search teams from the top navigation search form
 - Navigate between dashboard, teams, analysis, meta, and testing routes
@@ -138,6 +141,7 @@ Progress:
 
 - saved teams now have a deterministic analysis endpoint
 - team detail pages now render structural readouts
+- the dedicated Analysis page now lets the user choose a saved team and inspect the live structural readout
 - current analysis includes type stacking, defensive buckets, speed-control checks, utility checks, and practical recommendations
 
 ## Phase 4: Meta Comparison
@@ -182,15 +186,15 @@ Tasks:
 
 1. Keep polishing builder ergonomics around species/forms and slot editing flow.
 2. Expand the analysis engine with richer role and matchup heuristics.
-3. Feed analysis outputs into the dedicated Analysis page as well as team detail pages.
-4. Start the meta snapshot persistence layer once the analysis model feels solid.
+3. Start the meta snapshot persistence layer once the analysis model feels solid.
+4. Generate initial compare-vs-meta views on top of stored snapshots.
 
 ## Last Updated Snapshot
 
 - Current active milestone: Analysis Engine
 - Last completed milestone: Team Builder
-- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, and first-pass deterministic structural analysis
-- Current next recommendation: deepen the analysis model and begin reusing it across the dedicated analysis experience
+- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, first-pass deterministic structural analysis, and a team-aware Analysis workspace
+- Current next recommendation: deepen the analysis model and then begin the meta snapshot persistence layer
 
 ## Notes
 
