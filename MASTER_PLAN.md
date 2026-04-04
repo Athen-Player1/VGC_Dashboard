@@ -47,6 +47,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Dedicated Analysis page now loads and compares a selected saved team using the same analysis engine
 - Meta snapshots now persist in PostgreSQL and the Meta page reads the active stored snapshot
 - First-pass compare-vs-meta summaries now render for a selected saved team against active snapshot teams
+- Weakness chart and richer matchup-plan fields are now live in the core team and meta workflows
 
 ### In Progress
 
@@ -55,6 +56,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Reusing analysis outputs across more product surfaces before deeper matchup planning work begins
 - Building compare-vs-meta behavior on top of persisted snapshot data
 - Turning compare output into fuller matchup plans with better lead and danger heuristics
+- Adding practical research hooks so moveset work can jump directly into Smogon references
 
 ### Not Started
 
@@ -82,6 +84,8 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Open the dedicated Analysis desk for a specific saved team
 - Load the active persisted meta snapshot in the Meta workspace
 - Generate first-pass matchup summaries for a selected team against active snapshot teams
+- View a full weakness chart for a saved team
+- Open Smogon Dex and Smogon Search links directly from team builder slots
 - Run app in Docker
 - Search teams from the top navigation search form
 - Navigate between dashboard, teams, analysis, meta, and testing routes
@@ -147,7 +151,7 @@ Progress:
 - saved teams now have a deterministic analysis endpoint
 - team detail pages now render structural readouts
 - the dedicated Analysis page now lets the user choose a saved team and inspect the live structural readout
-- current analysis includes type stacking, defensive buckets, speed-control checks, utility checks, and practical recommendations
+- current analysis includes type stacking, a full weakness chart, defensive buckets, speed-control checks, utility checks, and practical recommendations
 
 ## Phase 4: Meta Comparison
 
@@ -156,7 +160,6 @@ Goal: compare saved teams against dated format snapshots.
 Status: in progress
 
 Tasks:
-
 - create format and meta snapshot tables
 - store dated top-team snapshots
 - surface common threats and archetypes
@@ -170,6 +173,7 @@ Progress:
 - the Meta page now loads the active snapshot through dedicated API routes
 - saved team flows can now deep-link into the Meta workspace for comparison context
 - selected teams now receive first-pass matchup summaries against the active snapshot teams
+- matchup summaries now include preserve targets, win conditions, tera notes, and danger checklists
 
 ## Phase 5: Matchup Planning
 
@@ -178,6 +182,8 @@ Goal: generate practical game plans using the saved team and meta data.
 Tasks:
 
 - lead suggestions
+- Add a weakness chart widget
+- Automate the loading of meta and top team snapshots from the web
 - preserve targets and win-condition notes
 - danger checklist
 - matchup summaries against common archetypes
@@ -201,15 +207,15 @@ Tasks:
 
 1. Keep polishing builder ergonomics around species/forms and slot editing flow.
 2. Expand the analysis engine with richer role and matchup heuristics.
-3. Turn first-pass compare summaries into fuller matchup-plan output.
-4. Add admin-friendly meta snapshot management once the comparison model settles.
+3. Add admin-friendly meta snapshot management once the comparison model settles.
+4. Keep the simulator deferred until the core non-sim workflow feels complete.
 
 ## Last Updated Snapshot
 
 - Current active milestone: Analysis Engine
 - Last completed milestone: Team Builder
-- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, first-pass deterministic structural analysis, a team-aware Analysis workspace, persisted meta snapshots, and first-pass compare-vs-meta summaries
-- Current next recommendation: improve the matchup-summary heuristics until they are strong enough to become full matchup plans
+- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, a weakness chart, deterministic structural analysis, a team-aware Analysis workspace, persisted meta snapshots, and richer compare-vs-meta matchup plans
+- Current next recommendation: keep improving analysis and snapshot-management polish, but the core non-simulator product loop is now largely in place
 
 ## Notes
 

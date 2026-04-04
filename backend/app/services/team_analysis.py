@@ -118,6 +118,7 @@ def build_team_analysis(team: TeamResponse) -> TeamAnalysisResponse:
         team_id=team.id,
         filled_slots=len(filled_members),
         metrics=metrics,
+        type_matrix=sorted(type_summary, key=lambda entry: entry.type),
         shared_weaknesses=shared_weaknesses,
         defensive_benchmarks=defensive_benchmarks,
         coverage_checks=checks,

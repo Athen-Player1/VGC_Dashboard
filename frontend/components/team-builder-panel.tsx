@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { updateTeam } from "@/lib/api";
 import { ChipListInput } from "@/components/chip-list-input";
-import { getPokemonImageUrl, normalizePokemonSlot } from "@/lib/pokemon";
+import { getPokemonImageUrl, getSmogonDexUrl, getSmogonSearchUrl, normalizePokemonSlot } from "@/lib/pokemon";
 import { PokemonSlot, Team } from "@/lib/types";
 
 const emptyMember = (): PokemonSlot => ({
@@ -304,6 +304,26 @@ export function TeamBuilderPanel({ team }: { team: Team }) {
                 >
                   Clear Slot
                 </button>
+                {member.name.trim() ? (
+                  <a
+                    className="rounded-xl bg-[var(--secondary-fixed)] px-4 py-2.5 font-headline text-sm font-bold text-[var(--secondary)]"
+                    href={getSmogonDexUrl(member.name)}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Smogon Dex
+                  </a>
+                ) : null}
+                {member.name.trim() ? (
+                  <a
+                    className="rounded-xl bg-white px-4 py-2.5 font-headline text-sm font-bold text-[var(--secondary)] ring-1 ring-[var(--outline-variant)]"
+                    href={getSmogonSearchUrl(member.name)}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Smogon Search
+                  </a>
+                ) : null}
               </div>
             </div>
           </article>

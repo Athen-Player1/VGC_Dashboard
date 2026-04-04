@@ -82,6 +82,7 @@ export type TeamAnalysis = {
   team_id: string;
   filled_slots: number;
   metrics: AnalysisMetric[];
+  type_matrix: TypePressure[];
   shared_weaknesses: TypePressure[];
   defensive_benchmarks: TypePressure[];
   coverage_checks: CoverageCheck[];
@@ -97,6 +98,10 @@ export type MatchupSummary = {
   overview: string;
   focus_points: string[];
   suggested_leads: string[];
+  preserve_targets: string[];
+  win_conditions: string[];
+  tera_notes: string[];
   game_plan: string[];
   danger_points: string[];
+  danger_checklist: string[];
 };

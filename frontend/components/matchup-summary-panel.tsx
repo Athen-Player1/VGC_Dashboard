@@ -91,6 +91,54 @@ export function MatchupSummaryPanel({
 
             <div className="mt-5">
               <div className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
+                Preserve Targets
+              </div>
+              <div className="mt-3 space-y-2">
+                {matchup.preserve_targets.map((item) => (
+                  <p
+                    key={item}
+                    className="rounded-xl bg-white px-3 py-2 text-sm text-[var(--on-surface-variant)]"
+                  >
+                    {item}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
+                Win Conditions
+              </div>
+              <div className="mt-3 space-y-2">
+                {matchup.win_conditions.map((item) => (
+                  <p
+                    key={item}
+                    className="rounded-xl bg-[var(--secondary-fixed)]/60 px-3 py-2 text-sm text-[var(--on-surface)]"
+                  >
+                    {item}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
+                Tera Notes
+              </div>
+              <div className="mt-3 space-y-2">
+                {matchup.tera_notes.map((item) => (
+                  <p
+                    key={item}
+                    className="rounded-xl bg-white px-3 py-2 text-sm text-[var(--on-surface-variant)]"
+                  >
+                    {item}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
                 Focus Points
               </div>
               <div className="mt-3 space-y-2">
@@ -114,6 +162,22 @@ export function MatchupSummaryPanel({
                   <p
                     key={step}
                     className="rounded-xl bg-[var(--secondary-fixed)]/60 px-3 py-2 text-sm text-[var(--on-surface)]"
+                  >
+                    {step}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
+                Danger Checklist
+              </div>
+              <div className="mt-3 space-y-2">
+                {matchup.danger_checklist.map((step) => (
+                  <p
+                    key={step}
+                    className="rounded-xl bg-[var(--error-container)]/50 px-3 py-2 text-sm text-[var(--on-surface)]"
                   >
                     {step}
                   </p>

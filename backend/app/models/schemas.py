@@ -99,6 +99,7 @@ class TeamAnalysisResponse(BaseModel):
     team_id: str
     filled_slots: int
     metrics: list[AnalysisMetric] = Field(default_factory=list)
+    type_matrix: list[TypePressure] = Field(default_factory=list)
     shared_weaknesses: list[TypePressure] = Field(default_factory=list)
     defensive_benchmarks: list[TypePressure] = Field(default_factory=list)
     coverage_checks: list[CoverageCheck] = Field(default_factory=list)
@@ -143,5 +144,9 @@ class MatchupSummaryResponse(BaseModel):
     overview: str
     focus_points: list[str] = Field(default_factory=list)
     suggested_leads: list[str] = Field(default_factory=list)
+    preserve_targets: list[str] = Field(default_factory=list)
+    win_conditions: list[str] = Field(default_factory=list)
+    tera_notes: list[str] = Field(default_factory=list)
     game_plan: list[str] = Field(default_factory=list)
     danger_points: list[str] = Field(default_factory=list)
+    danger_checklist: list[str] = Field(default_factory=list)

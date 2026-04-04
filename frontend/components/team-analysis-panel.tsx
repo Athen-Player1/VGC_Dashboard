@@ -1,3 +1,4 @@
+import { TypeMatrixPanel } from "@/components/type-matrix-panel";
 import { TeamAnalysis } from "@/lib/types";
 
 function statusClasses(status: string) {
@@ -130,6 +131,8 @@ export function TeamAnalysisPanel({ analysis }: { analysis: TeamAnalysis }) {
           </div>
         </div>
       </div>
+
+      <TypeMatrixPanel analysis={analysis} />
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="rounded-[1.25rem] bg-white p-6 shadow-sm">

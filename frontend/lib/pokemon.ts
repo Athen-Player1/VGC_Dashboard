@@ -45,3 +45,12 @@ export function normalizePokemonSlot(member: PokemonSlot): PokemonSlot {
     image: member.image?.trim() || getPokemonImageUrl(member.name)
   };
 }
+
+export function getSmogonDexUrl(name: string): string {
+  const slug = slugifyPokemonSpecies(name);
+  return `https://www.smogon.com/dex/sv/pokemon/${slug}/vgc25-regulation-i/`;
+}
+
+export function getSmogonSearchUrl(name: string): string {
+  return `https://www.smogon.com/search/?q=${encodeURIComponent(name)}`;
+}
