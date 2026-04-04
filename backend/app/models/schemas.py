@@ -134,3 +134,14 @@ class MetaSnapshotResponse(BaseModel):
     recommendations: list[str] = Field(default_factory=list)
     threats: list[ThreatResponse] = Field(default_factory=list)
     metaTeams: list[MetaTeamResponse] = Field(default_factory=list)
+
+
+class MatchupSummaryResponse(BaseModel):
+    meta_team_id: str
+    meta_team_name: str
+    danger_level: str
+    overview: str
+    focus_points: list[str] = Field(default_factory=list)
+    suggested_leads: list[str] = Field(default_factory=list)
+    game_plan: list[str] = Field(default_factory=list)
+    danger_points: list[str] = Field(default_factory=list)

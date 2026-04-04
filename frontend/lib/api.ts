@@ -1,4 +1,11 @@
-import { DashboardData, MetaSnapshot, PokemonSlot, Team, TeamAnalysis } from "./types";
+import {
+  DashboardData,
+  MatchupSummary,
+  MetaSnapshot,
+  PokemonSlot,
+  Team,
+  TeamAnalysis
+} from "./types";
 
 const API_BASE_URL =
   process.env.API_BASE_URL ??
@@ -59,6 +66,18 @@ export async function getActiveMetaSnapshot(): Promise<MetaSnapshot> {
 
   if (!response.ok) {
     throw new Error("Failed to load active meta snapshot");
+  }
+
+  return response.json();
+}
+
+export async function getTeamMetaMatchups(teamId: string): Promise<MatchupSummary[]> {
+  const response = await fetch(`${API_BASE_URL}/teams/${teamId}/meta-matchups`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load team meta matchups");
   }
 
   return response.json();

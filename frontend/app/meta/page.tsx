@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { loadActiveMetaSnapshot, loadDashboardData, loadTeamById } from "@/lib/dashboard-data";
+import { MatchupSummaryPanel } from "@/components/matchup-summary-panel";
+import {
+  loadActiveMetaSnapshot,
+  loadDashboardData,
+  loadTeamById,
+  loadTeamMetaMatchups
+} from "@/lib/dashboard-data";
 
 export default async function MetaPage({
   searchParams
@@ -12,6 +18,8 @@ export default async function MetaPage({
   const activeSnapshot = await loadActiveMetaSnapshot();
   const selectedTeamId = params.team;
   const selectedTeam = selectedTeamId ? await loadTeamById(selectedTeamId) : undefined;
+  const matchupSummaries =
+    selectedTeamId && selectedTeam ? await loadTeamMetaMatchups(selectedTeamId) : undefined;
   const metaData = activeSnapshot ?? {
     id: "fallback",
     format: data.activeFormat,
@@ -108,6 +116,10 @@ export default async function MetaPage({
             </div>
           </article>
         </section>
+
+        {selectedTeam && matchupSummaries ? (
+          <MatchupSummaryPanel matchups={matchupSummaries} teamName={selectedTeam.name} />
+        ) : null}
 
         <section className="grid gap-6 lg:grid-cols-2">
           {metaData.metaTeams.map((metaTeam) => (

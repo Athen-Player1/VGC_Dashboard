@@ -89,3 +89,14 @@ export type TeamAnalysis = {
   warnings: string[];
   recommendations: string[];
 };
+
+export type MatchupSummary = {
+  meta_team_id: string;
+  meta_team_name: string;
+  danger_level: string;
+  overview: string;
+  focus_points: string[];
+  suggested_leads: string[];
+  game_plan: string[];
+  danger_points: string[];
+};
