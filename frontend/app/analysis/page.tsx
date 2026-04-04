@@ -42,6 +42,14 @@ export default async function AnalysisPage({
                 Open Team Builder
               </Link>
             ) : null}
+            {selectedTeam ? (
+              <Link
+                className="rounded-2xl bg-[var(--surface-container-low)] px-5 py-3 font-headline text-sm font-bold text-[var(--primary)]"
+                href={`/meta?team=${selectedTeam.id}`}
+              >
+                Compare vs Meta
+              </Link>
+            ) : null}
             <Link
               className="rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-container)] px-6 py-3 font-headline text-sm font-bold text-white"
               href="/meta"

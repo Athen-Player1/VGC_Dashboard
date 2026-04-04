@@ -37,6 +37,18 @@ export type MetaTeam = {
   plan: string[];
 };
 
+export type MetaSnapshot = {
+  id: string;
+  format: string;
+  source: string;
+  snapshotDate: string;
+  active: boolean;
+  weaknessSummary: string[];
+  recommendations: string[];
+  threats: Threat[];
+  metaTeams: MetaTeam[];
+};
+
 export type DashboardData = {
   activeFormat: string;
   teams: Team[];

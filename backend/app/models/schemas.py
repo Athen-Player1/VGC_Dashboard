@@ -105,3 +105,32 @@ class TeamAnalysisResponse(BaseModel):
     strengths: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     recommendations: list[str] = Field(default_factory=list)
+
+
+class ThreatResponse(BaseModel):
+    name: str
+    threatLevel: str
+    reason: str
+    counterplay: str
+
+
+class MetaTeamResponse(BaseModel):
+    id: str
+    name: str
+    format: str
+    archetype: str
+    core: list[str] = Field(default_factory=list)
+    pressurePoints: list[str] = Field(default_factory=list)
+    plan: list[str] = Field(default_factory=list)
+
+
+class MetaSnapshotResponse(BaseModel):
+    id: str
+    format: str
+    source: str
+    snapshotDate: str
+    active: bool
+    weaknessSummary: list[str] = Field(default_factory=list)
+    recommendations: list[str] = Field(default_factory=list)
+    threats: list[ThreatResponse] = Field(default_factory=list)
+    metaTeams: list[MetaTeamResponse] = Field(default_factory=list)

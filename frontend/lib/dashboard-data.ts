@@ -1,5 +1,5 @@
-import { getDashboardData, getTeam, getTeamAnalysis } from "./api";
-import { DashboardData, Team, TeamAnalysis } from "./types";
+import { getActiveMetaSnapshot, getDashboardData, getTeam, getTeamAnalysis } from "./api";
+import { DashboardData, MetaSnapshot, Team, TeamAnalysis } from "./types";
 
 export const fallbackData: DashboardData = {
   activeFormat: "Offline Preview",
@@ -228,6 +228,14 @@ export async function loadTeamById(teamId: string): Promise<Team | undefined> {
 export async function loadTeamAnalysis(teamId: string): Promise<TeamAnalysis | undefined> {
   try {
     return await getTeamAnalysis(teamId);
+  } catch {
+    return undefined;
+  }
+}
+
+export async function loadActiveMetaSnapshot(): Promise<MetaSnapshot | undefined> {
+  try {
+    return await getActiveMetaSnapshot();
   } catch {
     return undefined;
   }

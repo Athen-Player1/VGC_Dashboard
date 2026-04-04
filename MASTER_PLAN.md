@@ -45,12 +45,14 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - First deterministic team analysis endpoint added for saved teams
 - Team detail pages now surface structural analysis results from the API
 - Dedicated Analysis page now loads and compares a selected saved team using the same analysis engine
+- Meta snapshots now persist in PostgreSQL and the Meta page reads the active stored snapshot
 
 ### In Progress
 
 - Builder UX polish is underway so editing feels closer to a real drafting workflow
 - Expanding the deterministic analysis engine beyond the first structural pass
-- Reusing analysis outputs across more product surfaces before meta snapshot work begins
+- Reusing analysis outputs across more product surfaces before deeper matchup planning work begins
+- Building compare-vs-meta behavior on top of persisted snapshot data
 
 ### Not Started
 
@@ -77,6 +79,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Save imported Showdown teams
 - Load deterministic structural analysis on each saved team detail page
 - Open the dedicated Analysis desk for a specific saved team
+- Load the active persisted meta snapshot in the Meta workspace
 - Run app in Docker
 - Search teams from the top navigation search form
 - Navigate between dashboard, teams, analysis, meta, and testing routes
@@ -148,6 +151,8 @@ Progress:
 
 Goal: compare saved teams against dated format snapshots.
 
+Status: in progress
+
 Tasks:
 
 - create format and meta snapshot tables
@@ -155,6 +160,13 @@ Tasks:
 - surface common threats and archetypes
 - compare a selected team to snapshot teams
 - highlight pressure points and exposed slots
+
+Progress:
+
+- meta snapshots are now stored in PostgreSQL
+- the dashboard now pulls threat and meta data from the active stored snapshot
+- the Meta page now loads the active snapshot through dedicated API routes
+- saved team flows can now deep-link into the Meta workspace for comparison context
 
 ## Phase 5: Matchup Planning
 
@@ -186,15 +198,15 @@ Tasks:
 
 1. Keep polishing builder ergonomics around species/forms and slot editing flow.
 2. Expand the analysis engine with richer role and matchup heuristics.
-3. Start the meta snapshot persistence layer once the analysis model feels solid.
-4. Generate initial compare-vs-meta views on top of stored snapshots.
+3. Generate initial compare-vs-meta views on top of stored snapshots.
+4. Add matchup-plan generation once compare output is credible.
 
 ## Last Updated Snapshot
 
 - Current active milestone: Analysis Engine
 - Last completed milestone: Team Builder
-- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, first-pass deterministic structural analysis, and a team-aware Analysis workspace
-- Current next recommendation: deepen the analysis model and then begin the meta snapshot persistence layer
+- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, first-pass deterministic structural analysis, a team-aware Analysis workspace, and persisted meta snapshots
+- Current next recommendation: use the stored snapshot layer to build the first real compare-vs-meta outputs
 
 ## Notes
 

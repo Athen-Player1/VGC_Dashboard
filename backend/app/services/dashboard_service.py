@@ -1,13 +1,15 @@
-from app.data.sample_data import dashboard_data
+from app.services.meta_store import get_active_meta_snapshot
 from app.services.team_store import list_teams
 
 
 def build_dashboard_payload() -> dict:
+    active_snapshot = get_active_meta_snapshot()
+
     return {
-        "activeFormat": dashboard_data["activeFormat"],
+        "activeFormat": active_snapshot["format"],
         "teams": list_teams(),
-        "threats": dashboard_data["threats"],
-        "weaknessSummary": dashboard_data["weaknessSummary"],
-        "recommendations": dashboard_data["recommendations"],
-        "metaTeams": dashboard_data["metaTeams"],
+        "threats": active_snapshot["threats"],
+        "weaknessSummary": active_snapshot["weaknessSummary"],
+        "recommendations": active_snapshot["recommendations"],
+        "metaTeams": active_snapshot["metaTeams"],
     }

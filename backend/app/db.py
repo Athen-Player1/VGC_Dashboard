@@ -44,6 +44,23 @@ def init_db() -> None:
                 )
                 """
             )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS meta_snapshots (
+                    id TEXT PRIMARY KEY,
+                    format TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    snapshot_date DATE NOT NULL,
+                    active BOOLEAN NOT NULL DEFAULT FALSE,
+                    weakness_summary JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    recommendations JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    threats JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    meta_teams JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
+            )
 
 
 def serialize_json(value: object) -> str:

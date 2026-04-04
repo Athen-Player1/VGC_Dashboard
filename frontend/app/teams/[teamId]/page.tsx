@@ -46,7 +46,7 @@ export default async function TeamDetailPage({
             </Link>
             <Link
               className="rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-container)] px-6 py-3 font-headline text-sm font-bold text-white"
-              href="/meta"
+              href={`/meta?team=${team.id}`}
             >
               Compare to Meta
             </Link>
