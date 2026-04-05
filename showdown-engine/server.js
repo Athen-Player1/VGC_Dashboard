@@ -1,5 +1,5 @@
 const express = require("express");
-const { BattleStream, Teams, TeamValidator, getPlayerStreams } = require("pokemon-showdown");
+const { BattleStream, Dex, Teams, TeamValidator, getPlayerStreams } = require("pokemon-showdown");
 const { RandomPlayerAI } = require("pokemon-showdown/dist/sim/tools/random-player-ai");
 
 const app = express();
@@ -38,15 +38,35 @@ function resolveBattleFormat(formatLabel) {
 }
 
 function simplifySet(set) {
+  const species = Dex.species.get(set.species || set.name || "");
+
   return {
     name: set.name || set.species || "",
     item: set.item || null,
     ability: set.ability || null,
     moves: set.moves || [],
     nature: set.nature || null,
-    tera_type: set.teraType || null
+    tera_type: set.teraType || null,
+    types: species?.types || []
   };
 }
+
+app.post("/pokemon/species-types", (request, response) => {
+  const names = Array.isArray(request.body?.names) ? request.body.names : [];
+
+  response.json({
+    pokemon: names.map((rawName) => {
+      const name = String(rawName || "").trim();
+      const species = Dex.species.get(name);
+
+      return {
+        name,
+        exists: Boolean(species?.exists),
+        types: species?.exists ? species.types || [] : []
+      };
+    })
+  });
+});
 
 app.get("/health", (_request, response) => {
   response.json({ status: "ok" });

@@ -1,7 +1,9 @@
 import re
+import os
 from typing import Any
 from uuid import uuid4
 
+import requests
 from fastapi import HTTPException
 
 from app.db import get_db_connection, serialize_json
@@ -18,6 +20,8 @@ SPECIAL_IMAGE_SLUGS = {
     "Bloodmoon Ursaluna": "ursaluna-bloodmoon",
     "Landorus": "landorus-therian",
 }
+
+SHOWDOWN_ENGINE_URL = os.getenv("SHOWDOWN_ENGINE_URL", "http://showdown-engine:3100")
 
 
 def _slugify_species(name: str) -> str:
@@ -43,12 +47,55 @@ def _member_from_showdown(pokemon: ShowdownPokemon) -> dict[str, Any]:
         "name": pokemon.name,
         "item": pokemon.item or "",
         "ability": pokemon.ability or "",
-        "types": [],
+        "types": pokemon.types or [],
         "moves": pokemon.moves,
         "role": "Imported set",
         "teraType": pokemon.tera_type,
         "image": _image_for_species(pokemon.name),
     }
+
+
+def _lookup_species_types(names: list[str]) -> dict[str, list[str]]:
+    unique_names = [name for name in dict.fromkeys(name.strip() for name in names if name.strip())]
+    if not unique_names:
+        return {}
+
+    try:
+        response = requests.post(
+            f"{SHOWDOWN_ENGINE_URL}/pokemon/species-types",
+            json={"names": unique_names},
+            timeout=10,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except requests.RequestException:
+        return {}
+
+    resolved: dict[str, list[str]] = {}
+    for entry in payload.get("pokemon", []):
+        name = str(entry.get("name", "")).strip()
+        types = [
+            str(type_name).strip()
+            for type_name in entry.get("types", [])
+            if str(type_name).strip()
+        ]
+        if name and types:
+            resolved[name.casefold()] = types[:2]
+
+    return resolved
+
+
+def _apply_inferred_types(members: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    species_type_map = _lookup_species_types([member.get("name", "") for member in members])
+    enriched: list[dict[str, Any]] = []
+
+    for member in members:
+        normalized = dict(member)
+        if not normalized.get("types") and normalized.get("name"):
+            normalized["types"] = species_type_map.get(normalized["name"].casefold(), [])
+        enriched.append(normalized)
+
+    return enriched
 
 
 def _normalize_member(member: TeamMemberInput | dict[str, Any]) -> dict[str, Any]:
@@ -108,7 +155,7 @@ def create_team_from_showdown(
     team_name: str, team_format: str, pokemon: list[ShowdownPokemon]
 ) -> dict[str, Any]:
     team_id = f"team-{uuid4().hex[:8]}"
-    members = [_member_from_showdown(member) for member in pokemon]
+    members = _apply_inferred_types([_member_from_showdown(member) for member in pokemon])
     team = {
         "id": team_id,
         "name": team_name,
@@ -146,7 +193,7 @@ def create_team_from_showdown(
 
 def create_team(payload: TeamCreateRequest) -> dict[str, Any]:
     team_id = f"team-{uuid4().hex[:8]}"
-    members = [_normalize_member(member) for member in payload.members]
+    members = _apply_inferred_types([_normalize_member(member) for member in payload.members])
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -172,7 +219,7 @@ def create_team(payload: TeamCreateRequest) -> dict[str, Any]:
 
 
 def update_team(team_id: str, payload: TeamUpdateRequest) -> dict[str, Any]:
-    members = [_normalize_member(member) for member in payload.members]
+    members = _apply_inferred_types([_normalize_member(member) for member in payload.members])
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(

@@ -14,6 +14,7 @@ class ShowdownPokemon(BaseModel):
     moves: list[str] = Field(default_factory=list)
     nature: str | None = None
     tera_type: str | None = None
+    types: list[str] = Field(default_factory=list)
     evs: dict[str, int] = Field(default_factory=dict)
     ivs: dict[str, int] = Field(default_factory=dict)
 
