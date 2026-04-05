@@ -18,6 +18,10 @@ function statusBadge(status: SimulationJob["status"]) {
 }
 
 function engineBadge(engine?: string) {
+  if (engine === "showdown-mirror-neutral-v1") {
+    return "bg-[var(--primary-fixed)] text-[var(--primary)]";
+  }
+
   if (engine === "showdown-random-ai-v1") {
     return "bg-[var(--secondary-fixed)] text-[var(--secondary)]";
   }
@@ -30,6 +34,10 @@ function engineBadge(engine?: string) {
 }
 
 function engineLabel(engine?: string) {
+  if (engine === "showdown-mirror-neutral-v1") {
+    return "Mirror Neutral";
+  }
+
   if (engine === "showdown-random-ai-v1") {
     return "Showdown Stream";
   }

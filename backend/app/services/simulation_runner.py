@@ -113,6 +113,40 @@ def _run_showdown_simulation(
     if not team_validation["packedTeam"]:
         return None
 
+    if team_validation["packedTeam"] == opponent_validation["packedTeam"]:
+        wins = requested_games // 2
+        losses = requested_games - wins
+        sample_logs = [
+            {
+                "game": game_index,
+                "result": "win" if game_index % 2 == 1 else "loss",
+                "note": "Exact mirror match detected. Result normalized to a neutral split because both sides use the same team and the current bots are not skill-modelled.",
+            }
+            for game_index in range(1, min(requested_games, 5) + 1)
+        ]
+
+        return {
+            "teamName": team.name,
+            "opponentLabel": opponent_payload.get("name", "Imported Team"),
+            "gamesRequested": requested_games,
+            "wins": wins,
+            "losses": losses,
+            "winRate": round((wins / requested_games) * 100, 1) if requested_games else 0,
+            "topThreats": [
+                member.name for member in team.members if member.name
+            ][:3],
+            "repeatedIssues": [
+                "Mirror matches are treated as neutral in the MVP simulator."
+            ],
+            "recommendations": [
+                "Use non-mirror sims to measure whether a team change improves real matchup spread.",
+                "Mirror results are normalized because equal teams with random-choice bots do not produce a useful strategic signal.",
+            ],
+            "sampleGames": sample_logs,
+            "simulationEngine": "showdown-mirror-neutral-v1",
+            "engineNote": "Exact mirror matches are normalized to a 50/50 split so the simulator does not imply a fake edge from side order or bot randomness.",
+        }
+
     battle_batch = run_showdown_battle_batch(
         format_name=team.format,
         packed_team_a=team_validation["packedTeam"],
@@ -125,7 +159,7 @@ def _run_showdown_simulation(
     sample_logs = [
         {
             "game": result["game"],
-            "result": "win" if result["winner"] == "Alpha" else "loss",
+            "result": "win" if result.get("winnerTeam") == "Team A" else "loss",
             "note": _summarize_excerpt(result.get("excerpt", [])),
         }
         for result in battle_batch.get("results", [])[:5]

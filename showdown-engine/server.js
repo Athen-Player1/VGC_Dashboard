@@ -155,33 +155,41 @@ app.post("/simulate/batch", async (request, response) => {
 
   try {
     const results = [];
-    let p1Wins = 0;
-    let p2Wins = 0;
+    let teamAWins = 0;
+    let teamBWins = 0;
 
     for (let index = 0; index < games; index += 1) {
+      const swapSides = index % 2 === 1;
       const result = await runSingleBattle({
         format,
-        packedTeamA,
-        packedTeamB,
+        packedTeamA: swapSides ? packedTeamB : packedTeamA,
+        packedTeamB: swapSides ? packedTeamA : packedTeamB,
         seed: 1000 + index * 10
       });
+      const teamAWon =
+        (!swapSides && result.winner === "Alpha") || (swapSides && result.winner === "Beta");
+      const teamBWon =
+        (!swapSides && result.winner === "Beta") || (swapSides && result.winner === "Alpha");
+
       results.push({
         game: index + 1,
+        side: swapSides ? "swapped" : "default",
         winner: result.winner,
+        winnerTeam: teamAWon ? "Team A" : teamBWon ? "Team B" : "Unknown",
         excerpt: result.log.slice(-8)
       });
-      if (result.winner === "Alpha") {
-        p1Wins += 1;
-      } else if (result.winner === "Beta") {
-        p2Wins += 1;
+      if (teamAWon) {
+        teamAWins += 1;
+      } else if (teamBWon) {
+        teamBWins += 1;
       }
     }
 
     response.json({
       formatResolved: format,
       games,
-      p1Wins,
-      p2Wins,
+      p1Wins: teamAWins,
+      p2Wins: teamBWins,
       results
     });
   } catch (error) {
