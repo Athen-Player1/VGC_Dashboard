@@ -1,9 +1,11 @@
+import { ArchetypeMatchupPanel } from "@/components/archetype-matchup-panel";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { MatchupSummaryPanel } from "@/components/matchup-summary-panel";
 import { SnapshotManagementPanel } from "@/components/snapshot-management-panel";
 import {
   loadActiveMetaSnapshot,
+  loadTeamArchetypeMatchups,
   loadDashboardData,
   loadMetaSnapshots,
   loadTeamById,
@@ -23,6 +25,8 @@ export default async function MetaPage({
   const selectedTeam = selectedTeamId ? await loadTeamById(selectedTeamId) : undefined;
   const matchupSummaries =
     selectedTeamId && selectedTeam ? await loadTeamMetaMatchups(selectedTeamId) : undefined;
+  const archetypeMatchups =
+    selectedTeamId && selectedTeam ? await loadTeamArchetypeMatchups(selectedTeamId) : undefined;
   const metaData = activeSnapshot ?? {
     id: "fallback",
     format: data.activeFormat,
@@ -65,6 +69,12 @@ export default async function MetaPage({
               href="/analysis"
             >
               Open Analysis Desk
+            </Link>
+            <Link
+              className="rounded-2xl bg-white px-6 py-3 font-headline text-sm font-bold text-[var(--primary)] ring-1 ring-[var(--outline-variant)]"
+              href="/meta/top-teams"
+            >
+              Top 5 Teams
             </Link>
           </div>
         </div>
@@ -122,6 +132,10 @@ export default async function MetaPage({
 
         {selectedTeam && matchupSummaries ? (
           <MatchupSummaryPanel matchups={matchupSummaries} teamName={selectedTeam.name} />
+        ) : null}
+
+        {selectedTeam && archetypeMatchups ? (
+          <ArchetypeMatchupPanel matchups={archetypeMatchups} teamName={selectedTeam.name} />
         ) : null}
 
         <section className="grid gap-6 lg:grid-cols-2">

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Response
 
 from app.models.schemas import (
+    ArchetypeMatchupResponse,
     MatchupSummaryResponse,
     TeamAnalysisResponse,
     ShowdownImportRequest,
@@ -9,7 +10,7 @@ from app.models.schemas import (
     TeamResponse,
     TeamUpdateRequest,
 )
-from app.services.meta_compare import build_meta_matchups
+from app.services.meta_compare import build_archetype_matchups, build_meta_matchups
 from app.services.team_analysis import build_team_analysis
 from app.services.showdown_parser import parse_showdown_team
 from app.services.team_store import (
@@ -44,6 +45,12 @@ def get_team_analysis(team_id: str) -> TeamAnalysisResponse:
 def get_team_meta_matchups(team_id: str) -> list[MatchupSummaryResponse]:
     team = TeamResponse.model_validate(get_team(team_id))
     return build_meta_matchups(team)
+
+
+@router.get("/{team_id}/archetype-matchups", response_model=list[ArchetypeMatchupResponse])
+def get_team_archetype_matchups(team_id: str) -> list[ArchetypeMatchupResponse]:
+    team = TeamResponse.model_validate(get_team(team_id))
+    return build_archetype_matchups(team)
 
 
 @router.post("", response_model=TeamResponse)

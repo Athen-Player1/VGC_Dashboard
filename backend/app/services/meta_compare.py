@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from app.models.schemas import MatchupSummaryResponse, TeamResponse
+from collections import defaultdict
+
+from app.models.schemas import ArchetypeMatchupResponse, MatchupSummaryResponse, TeamResponse
 from app.services.meta_store import get_active_meta_snapshot
 from app.services.team_analysis import build_team_analysis
 
@@ -75,6 +77,45 @@ def build_meta_matchups(team: TeamResponse) -> list[MatchupSummaryResponse]:
             summary.meta_team_name,
         ),
     )
+
+
+def build_archetype_matchups(team: TeamResponse) -> list[ArchetypeMatchupResponse]:
+    active_snapshot = get_active_meta_snapshot()
+    grouped: dict[str, list[dict]] = defaultdict(list)
+    for meta_team in active_snapshot["metaTeams"]:
+        grouped[meta_team["archetype"]].append(meta_team)
+
+    team_analysis = build_team_analysis(team)
+    summaries: list[ArchetypeMatchupResponse] = []
+    for archetype, teams in grouped.items():
+        pressure_points = _dedupe(
+            [point for meta_team in teams for point in meta_team["pressurePoints"]]
+        )
+        pressure_types = _extract_pressure_types(pressure_points)
+        suggested_leads = _suggest_leads(team, pressure_types)
+        focus_points = _build_focus_points(team_analysis, pressure_points, [])
+        game_plan = _build_game_plan(
+            [step for meta_team in teams[:2] for step in meta_team["plan"][:1]],
+            team_analysis.recommendations,
+            suggested_leads,
+        )
+        overview = (
+            f"{archetype} appears {len(teams)} time(s) in the active snapshot. "
+            f"Use this as the shared prep plan before drilling into individual teams."
+        )
+        summaries.append(
+            ArchetypeMatchupResponse(
+                archetype=archetype,
+                team_count=len(teams),
+                representative_teams=[meta_team["name"] for meta_team in teams[:3]],
+                overview=overview,
+                focus_points=focus_points[:3],
+                suggested_leads=suggested_leads[:3],
+                game_plan=game_plan[:4],
+            )
+        )
+
+    return sorted(summaries, key=lambda item: (-item.team_count, item.archetype))
 
 
 def _extract_pressure_types(pressure_points: list[str]) -> list[str]:

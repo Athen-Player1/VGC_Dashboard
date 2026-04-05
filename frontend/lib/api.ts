@@ -1,4 +1,5 @@
 import {
+  ArchetypeMatchup,
   DashboardData,
   MatchupSummary,
   MetaSnapshot,
@@ -78,6 +79,18 @@ export async function getTeamMetaMatchups(teamId: string): Promise<MatchupSummar
 
   if (!response.ok) {
     throw new Error("Failed to load team meta matchups");
+  }
+
+  return response.json();
+}
+
+export async function getTeamArchetypeMatchups(teamId: string): Promise<ArchetypeMatchup[]> {
+  const response = await fetch(`${API_BASE_URL}/teams/${teamId}/archetype-matchups`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load team archetype matchups");
   }
 
   return response.json();

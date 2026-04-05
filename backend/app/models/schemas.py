@@ -169,3 +169,13 @@ class MatchupSummaryResponse(BaseModel):
     game_plan: list[str] = Field(default_factory=list)
     danger_points: list[str] = Field(default_factory=list)
     danger_checklist: list[str] = Field(default_factory=list)
+
+
+class ArchetypeMatchupResponse(BaseModel):
+    archetype: str
+    team_count: int
+    representative_teams: list[str] = Field(default_factory=list)
+    overview: str
+    focus_points: list[str] = Field(default_factory=list)
+    suggested_leads: list[str] = Field(default_factory=list)
+    game_plan: list[str] = Field(default_factory=list)

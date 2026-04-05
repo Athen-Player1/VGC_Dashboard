@@ -50,6 +50,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Weakness chart and richer matchup-plan fields are now live in the core team and meta workflows
 - Meta snapshots can now be imported and activated from the Meta workspace
 - Tournament-result snapshot automation is now live through Victory Road URL imports
+- Common archetype plans and a Top 5 Teams page are now live from the active snapshot
 
 ### In Progress
 
@@ -61,12 +62,12 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Adding practical research hooks so moveset work can jump directly into Smogon references
 - Snapshot-management UX can still be polished, but the core import/activate flow is now functional
 - Tournament-result ingestion is now the primary automation path; Showdown usage can remain a secondary future signal
+- Most remaining work is polish, deeper heuristics, and future automation rather than missing core workflow pages
 
 ### Not Started
 
 - Type/role/synergy analysis engine
 - Meta snapshot persistence and admin workflow
-- Matchup plan generation
 - Background battle simulator
 
 ## Working Features Right Now
@@ -163,7 +164,7 @@ Progress:
 
 Goal: compare saved teams against dated format snapshots.
 
-Status: in progress
+Status: complete
 
 Tasks:
 - create format and meta snapshot tables
@@ -187,6 +188,8 @@ Progress:
 
 Goal: generate practical game plans using the saved team and meta data.
 
+Status: complete
+
 Tasks:
 
 - lead suggestions
@@ -197,6 +200,13 @@ Tasks:
 - matchup summaries against common archetypes
 - A page on the top 5 teams
 - matchup summaries against top stored teams
+
+Progress:
+
+- matchup summaries now include lead suggestions, preserve targets, win conditions, tera notes, and danger checklists
+- the Meta page now renders common archetype plans for the selected team
+- the app now has a dedicated Top 5 Teams page driven by the active snapshot
+- matchup planning is available both at the individual top-team level and the repeated-archetype level
 
 ## Phase 6: Simulation
 
@@ -221,9 +231,9 @@ Tasks:
 
 ## Last Updated Snapshot
 
-- Current active milestone: Analysis Engine
-- Last completed milestone: Team Builder
-- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, a weakness chart, deterministic structural analysis, a team-aware Analysis workspace, persisted meta snapshots, richer compare-vs-meta matchup plans, in-app snapshot management, and Victory Road tournament imports
+- Current active milestone: Core App Polish
+- Last completed milestone: Matchup Planning
+- Current progress: the non-simulator core app loop is complete, including builder, analysis, persisted snapshots, tournament-result imports, top-team pages, archetype plans, and matchup planning
 - Current next recommendation: keep tournament results as the primary meta-snapshot source and only add Showdown as a supplementary trend layer
 
 ## Notes

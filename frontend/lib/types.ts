@@ -105,3 +105,13 @@ export type MatchupSummary = {
   danger_points: string[];
   danger_checklist: string[];
 };
+
+export type ArchetypeMatchup = {
+  archetype: string;
+  team_count: number;
+  representative_teams: string[];
+  overview: string;
+  focus_points: string[];
+  suggested_leads: string[];
+  game_plan: string[];
+};
