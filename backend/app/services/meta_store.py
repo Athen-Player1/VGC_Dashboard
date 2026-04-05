@@ -39,11 +39,6 @@ DEFAULT_SNAPSHOT = MetaSnapshotSeed(
 def initialize_meta_store() -> None:
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) AS total FROM meta_snapshots")
-            row = cursor.fetchone()
-            if row and row["total"] > 0:
-                return
-
             cursor.execute(
                 """
                 INSERT INTO meta_snapshots (
@@ -58,6 +53,15 @@ def initialize_meta_store() -> None:
                     meta_teams
                 )
                 VALUES (%s, %s, %s, %s, %s, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    format = EXCLUDED.format,
+                    source = EXCLUDED.source,
+                    snapshot_date = EXCLUDED.snapshot_date,
+                    weakness_summary = EXCLUDED.weakness_summary,
+                    recommendations = EXCLUDED.recommendations,
+                    threats = EXCLUDED.threats,
+                    meta_teams = EXCLUDED.meta_teams,
+                    updated_at = NOW()
                 """,
                 (
                     DEFAULT_SNAPSHOT.id,

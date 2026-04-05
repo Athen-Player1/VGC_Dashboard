@@ -21,6 +21,8 @@ Dockerized web app for building, saving, analyzing, comparing, and testing Pokem
 - Queue background 10-game simulation batches against the top meta team or a pasted Showdown team
 - Validate and normalize teams through a dedicated Showdown engine service before sim preflight
 - Run pasted input-team simulations through direct Showdown battle-stream execution
+- Run top-meta simulations through direct Showdown battle-stream execution whenever the active snapshot stores full sets
+- Import tournament snapshots from Victory Road pages that link to either `vrpastes.com` or `pokepast.es`
 
 ## Run
 
@@ -35,8 +37,8 @@ Then open:
 
 ## Notes
 
-- The simulation lane is currently an MVP background workflow using a stored heuristic runner.
+- The simulation lane is currently an MVP background workflow that can use either a stored heuristic runner or direct Showdown battle-stream execution, depending on how complete the opponent snapshot data is.
 - Team validation and packing now run through a dedicated internal service built on the official `pokemon-showdown` package.
 - Pasted input-team runs now use direct Showdown battle-stream execution with random legal-choice bots.
-- Top-meta runs still use the heuristic path until snapshots store fuller team sets.
+- Top-meta runs also use the direct Showdown path when the snapshot includes a full team export or imported OTS set.
 - The architecture is set up so a fuller Pokemon Showdown engine can replace the core simulator later without rewriting the app shell.

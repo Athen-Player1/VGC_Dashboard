@@ -9,8 +9,11 @@ import requests
 from bs4 import BeautifulSoup
 from fastapi import HTTPException
 
-from app.models.schemas import MetaSnapshotCreateRequest, VictoryRoadImportRequest
+from app.models.schemas import MetaSnapshotCreateRequest, ShowdownPokemon, VictoryRoadImportRequest
 from app.services.meta_store import create_meta_snapshot
+from app.services.showdown_parser import parse_showdown_team
+
+VRPASTES_API_URL = "https://vrpaste-backend.vercel.app/api/paste/{paste_id}?lang=english"
 
 
 def import_victory_road_snapshot(payload: VictoryRoadImportRequest) -> dict:
@@ -49,7 +52,7 @@ def import_victory_road_snapshot(payload: VictoryRoadImportRequest) -> dict:
 def _fetch_html(url: str) -> str:
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
-      raise HTTPException(status_code=400, detail="Only http and https URLs are supported")
+        raise HTTPException(status_code=400, detail="Only http and https URLs are supported")
 
     response = requests.get(
         url,
@@ -145,6 +148,7 @@ def _build_meta_teams(rows: list[dict], format_name: str) -> list[dict]:
     for index, row in enumerate(rows[:8], start=1):
         core = row["team"][:4]
         pressure_points = _infer_pressure_points(row["team"])
+        ots_data = _fetch_vr_paste(row["ots"]) if row["ots"] else None
         plan = [
             f"Expect {row['player']} to lean on {' / '.join(core[:2])} as the first positioning engine.",
             f"Respect the published OTS line before committing your defensive tera. OTS: {row['ots'] or 'not available'}",
@@ -159,6 +163,9 @@ def _build_meta_teams(rows: list[dict], format_name: str) -> list[dict]:
                 "core": core,
                 "pressurePoints": pressure_points,
                 "plan": plan,
+                "members": ots_data["members"] if ots_data else [],
+                "showdownText": ots_data["showdownText"] if ots_data else None,
+                "otsUrl": row["ots"] or None,
             }
         )
     return teams
@@ -217,3 +224,132 @@ def _infer_archetype(team: list[str]) -> str:
 
 def _slugify(value: str) -> str:
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", value.lower())).strip("-")
+
+
+def _fetch_vr_paste(url: str) -> dict | None:
+    if "pokepast.es" in url:
+        return _fetch_pokepaste(url)
+
+    paste_id = _extract_vr_paste_id(url)
+    if not paste_id:
+        return None
+
+    response = requests.get(
+        VRPASTES_API_URL.format(paste_id=paste_id),
+        timeout=30,
+        headers={"User-Agent": "VGC-Dashboard/1.0 meta snapshot importer"},
+    )
+    if response.status_code >= 400:
+        return None
+
+    try:
+        payload = response.json()
+    except ValueError:
+        return None
+
+    teams = payload.get("teams", [])
+    if not teams:
+        return None
+
+    members = [_build_member_from_vr_paste(team) for team in teams]
+    showdown_text = _build_showdown_export(teams)
+    return {"members": members, "showdownText": showdown_text}
+
+
+def _fetch_pokepaste(url: str) -> dict | None:
+    response = requests.get(
+        f"{url.rstrip('/')}/raw",
+        timeout=30,
+        headers={"User-Agent": "VGC-Dashboard/1.0 meta snapshot importer"},
+    )
+    if response.status_code >= 400:
+        return None
+
+    showdown_text = response.text.replace("\r", "").strip()
+    if not showdown_text:
+        return None
+
+    parsed_team = parse_showdown_team(showdown_text)
+    if not parsed_team:
+        return None
+
+    members = [_build_member_from_showdown(member) for member in parsed_team]
+    return {"members": members, "showdownText": showdown_text}
+
+
+def _extract_vr_paste_id(url: str) -> str | None:
+    match = re.search(r"vrpastes\.com/([A-Za-z0-9]+)", url)
+    return match.group(1) if match else None
+
+
+def _build_member_from_vr_paste(team: dict) -> dict:
+    image_slug = team.get("image", "")
+    image = (
+        f"https://img.pokemondb.net/sprites/scarlet-violet/normal/{image_slug}.png"
+        if image_slug
+        else ""
+    )
+    types = [team.get("type1", "").strip(), team.get("type2", "").strip()]
+    return {
+        "name": team.get("species") or team.get("name") or "",
+        "item": team.get("item", "") or "",
+        "ability": team.get("ability", "") or "",
+        "types": [item for item in types if item],
+        "moves": [move for move in team.get("moves", []) if move],
+        "role": "Imported OTS set",
+        "teraType": team.get("teraType") or None,
+        "image": image,
+    }
+
+
+def _build_showdown_export(teams: list[dict]) -> str:
+    sections: list[str] = []
+    for team in teams:
+        name = team.get("species") or team.get("name") or ""
+        if not name:
+            continue
+        header = name
+        item = team.get("item", "")
+        if item:
+            header = f"{header} @ {item}"
+        lines = [header]
+        ability = team.get("ability", "")
+        if ability:
+            lines.append(f"Ability: {ability}")
+        tera_type = team.get("teraType", "")
+        if tera_type:
+            lines.append(f"Tera Type: {tera_type}")
+        for move in team.get("moves", [])[:4]:
+            lines.append(f"- {move}")
+        sections.append("\n".join(lines))
+    return "\n\n".join(sections)
+
+
+def _build_member_from_showdown(team: ShowdownPokemon) -> dict:
+    normalized_name = team.name
+    image_slug = _normalize_image_slug(normalized_name)
+    image = (
+        f"https://img.pokemondb.net/sprites/scarlet-violet/normal/{image_slug}.png"
+        if image_slug
+        else ""
+    )
+    return {
+        "name": normalized_name,
+        "item": team.item or "",
+        "ability": team.ability or "",
+        "types": [],
+        "moves": [move for move in team.moves if move],
+        "role": "Imported OTS set",
+        "teraType": team.tera_type or None,
+        "image": image,
+    }
+
+
+def _normalize_image_slug(name: str) -> str:
+    return (
+        name.lower()
+        .replace("’", "")
+        .replace("'", "")
+        .replace(" ", "-")
+        .replace(".", "")
+    )

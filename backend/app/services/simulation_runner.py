@@ -22,10 +22,9 @@ def run_simulation_job(job: dict[str, Any]) -> dict[str, Any]:
     opponent_payload = job["opponent_payload"]
     requested_games = int(job["requested_games"])
 
-    if job["opponent_mode"] == "input_team":
-        actual_result = _run_showdown_simulation(team, opponent_payload, requested_games)
-        if actual_result is not None:
-            return actual_result
+    actual_result = _run_showdown_simulation(team, opponent_payload, requested_games)
+    if actual_result is not None:
+        return actual_result
 
     base_win_rate, context = _calculate_base_win_rate(team, opponent_payload, job["opponent_mode"])
     rng = random.Random(job["id"])
@@ -140,7 +139,7 @@ def _run_showdown_simulation(
         member.get("name")
         for member in opponent_payload.get("members", [])
         if member.get("name")
-    ][:3]
+    ][:3] or opponent_payload.get("core", [])[:3]
 
     recommendations = [
         "This result came from live Showdown battle-stream execution, so re-run after each team edit to see whether the record actually moves.",
@@ -161,7 +160,7 @@ def _run_showdown_simulation(
         "recommendations": recommendations[:4],
         "sampleGames": sample_logs,
         "simulationEngine": "showdown-random-ai-v1",
-        "engineNote": f"Input-team sims now run through the pinned Pokemon Showdown battle stream using random legal-choice bots in {battle_batch.get('formatResolved', team.format)}. Top-meta sims still use the heuristic path until full opponent sets are available.",
+        "engineNote": f"This batch ran through the pinned Pokemon Showdown battle stream using random legal-choice bots in {battle_batch.get('formatResolved', team.format)}. Heuristic fallback is only used when the opponent snapshot lacks full stored sets.",
     }
 
 

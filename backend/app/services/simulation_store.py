@@ -53,6 +53,7 @@ def _resolve_opponent_payload(
             raise HTTPException(status_code=400, detail="No teams found in the active meta snapshot")
 
         top_team = active_snapshot["metaTeams"][0]
+        validation = _build_showdown_validation_from_meta_team(top_team, team_format)
         return (
             top_team["name"],
             {
@@ -64,6 +65,10 @@ def _resolve_opponent_payload(
                 "pressurePoints": top_team["pressurePoints"],
                 "plan": top_team["plan"],
                 "sourceSnapshotId": active_snapshot["id"],
+                "members": top_team.get("members", []),
+                "showdownText": top_team.get("showdownText"),
+                "otsUrl": top_team.get("otsUrl"),
+                "showdownValidation": validation,
             },
         )
 
@@ -266,3 +271,22 @@ def fail_simulation_job(job_id: str, error_message: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="Simulation job not found")
 
     return _normalize_job(row)
+
+
+def _build_showdown_validation_from_meta_team(meta_team: dict[str, Any], team_format: str) -> dict[str, Any] | None:
+    showdown_text = meta_team.get("showdownText")
+    members = meta_team.get("members") or []
+    if not showdown_text and not members:
+        return None
+
+    validation = validate_with_showdown(
+        ShowdownValidationRequest(
+            format=team_format,
+            showdownText=showdown_text,
+            members=members,
+        )
+    )
+    return {
+        **validation,
+        "pokemon": [member.model_dump() for member in validation["pokemon"]],
+    }

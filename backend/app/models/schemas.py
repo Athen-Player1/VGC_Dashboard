@@ -139,6 +139,9 @@ class MetaTeamResponse(BaseModel):
     core: list[str] = Field(default_factory=list)
     pressurePoints: list[str] = Field(default_factory=list)
     plan: list[str] = Field(default_factory=list)
+    members: list[TeamMember] = Field(default_factory=list)
+    showdownText: str | None = None
+    otsUrl: str | None = None
 
 
 class MetaSnapshotResponse(BaseModel):
