@@ -149,6 +149,7 @@ function MetaCard({ metaTeam }: { metaTeam: MetaTeam }) {
 
 export function DashboardShell({ data }: { data: DashboardData }) {
   const [activeTeam, secondaryTeam] = data.teams;
+  const hasTeams = data.teams.length > 0;
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -182,57 +183,109 @@ export function DashboardShell({ data }: { data: DashboardData }) {
 
           <div className="grid gap-8 xl:grid-cols-12">
             <section className="space-y-8 xl:col-span-8">
-              <TeamCard team={activeTeam} />
-              <div className="grid gap-8 md:grid-cols-[1.15fr_0.85fr]">
-                <article className="card-shadow rounded-[1.25rem] bg-white p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="font-headline text-lg font-bold">{secondaryTeam.name}</h2>
-                      <p className="mt-1 text-sm text-[var(--on-surface-variant)]">
-                        Stored bench team ready for side-by-side prep and further tuning.
-                      </p>
-                    </div>
-                    <Link className="font-headline text-sm font-bold text-[var(--primary)]" href={`/teams/${secondaryTeam.id}`}>
-                      Open
-                    </Link>
-                  </div>
-                  <div className="mt-6 flex -space-x-3">
-                    {secondaryTeam.members.slice(0, 4).map((member) => (
-                      <div
-                        key={member.name}
-                        className="relative h-14 w-14 overflow-hidden rounded-full border-4 border-white bg-[var(--surface-container-low)]"
-                      >
-                        <Image alt={member.name} className="object-contain p-1.5" fill sizes="56px" src={member.image} />
-                      </div>
-                    ))}
-                    <div className="grid h-14 w-14 place-items-center rounded-full border-4 border-white bg-[var(--surface-container-low)] font-label text-xs font-bold text-[var(--outline)]">
-                      +2
-                    </div>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between">
-                    <span className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
-                      Meta fit score
-                    </span>
-                    <span className="font-headline text-lg font-bold text-[var(--secondary)]">78 / 100</span>
-                  </div>
-                </article>
+              {hasTeams && activeTeam ? (
+                <>
+                  <TeamCard team={activeTeam} />
+                  <div className="grid gap-8 md:grid-cols-[1.15fr_0.85fr]">
+                    {secondaryTeam ? (
+                      <article className="card-shadow rounded-[1.25rem] bg-white p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h2 className="font-headline text-lg font-bold">{secondaryTeam.name}</h2>
+                            <p className="mt-1 text-sm text-[var(--on-surface-variant)]">
+                              Stored bench team ready for side-by-side prep and further tuning.
+                            </p>
+                          </div>
+                          <Link className="font-headline text-sm font-bold text-[var(--primary)]" href={`/teams/${secondaryTeam.id}`}>
+                            Open
+                          </Link>
+                        </div>
+                        <div className="mt-6 flex -space-x-3">
+                          {secondaryTeam.members.slice(0, 4).map((member) => (
+                            <div
+                              key={member.name}
+                              className="relative h-14 w-14 overflow-hidden rounded-full border-4 border-white bg-[var(--surface-container-low)]"
+                            >
+                              <Image alt={member.name} className="object-contain p-1.5" fill sizes="56px" src={member.image} />
+                            </div>
+                          ))}
+                          {secondaryTeam.members.length > 4 ? (
+                            <div className="grid h-14 w-14 place-items-center rounded-full border-4 border-white bg-[var(--surface-container-low)] font-label text-xs font-bold text-[var(--outline)]">
+                              +{secondaryTeam.members.length - 4}
+                            </div>
+                          ) : null}
+                        </div>
+                        <div className="mt-6 flex items-center justify-between">
+                          <span className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
+                            Meta fit score
+                          </span>
+                          <span className="font-headline text-lg font-bold text-[var(--secondary)]">78 / 100</span>
+                        </div>
+                      </article>
+                    ) : (
+                      <article className="card-shadow rounded-[1.25rem] bg-white p-6">
+                        <div className="grid h-14 w-14 place-items-center rounded-full bg-[var(--surface-container)]">
+                          <span className="material-symbols-outlined text-[var(--outline)]">add_circle</span>
+                        </div>
+                        <h2 className="mt-5 font-headline text-lg font-bold">Build your next shell</h2>
+                        <p className="mt-2 text-sm leading-6 text-[var(--on-surface-variant)]">
+                          You already have one saved team. Add another to compare modes, prep side-by-side, or stage test variants.
+                        </p>
+                        <Link
+                          className="mt-6 inline-flex rounded-xl bg-[var(--surface-container-low)] px-4 py-2.5 font-headline text-sm font-bold text-[var(--primary)]"
+                          href="/teams?compose=1"
+                        >
+                          Create Another Team
+                        </Link>
+                      </article>
+                    )}
 
-                <article className="rounded-[1.25rem] border-2 border-dashed border-[var(--outline-variant)] bg-white/75 p-6 transition-colors hover:bg-[var(--primary)]/5">
-                  <div className="grid h-14 w-14 place-items-center rounded-full bg-[var(--surface-container)]">
-                    <span className="material-symbols-outlined text-[var(--outline)]">save</span>
+                    <article className="rounded-[1.25rem] border-2 border-dashed border-[var(--outline-variant)] bg-white/75 p-6 transition-colors hover:bg-[var(--primary)]/5">
+                      <div className="grid h-14 w-14 place-items-center rounded-full bg-[var(--surface-container)]">
+                        <span className="material-symbols-outlined text-[var(--outline)]">save</span>
+                      </div>
+                      <h2 className="mt-5 font-headline text-lg font-bold">Saved Team Slots</h2>
+                      <p className="mt-2 text-sm leading-6 text-[var(--on-surface-variant)]">
+                        Your saved teams are now persistent and ready for sharing, analysis, and background simulation batches.
+                      </p>
+                      <Link
+                        className="mt-6 inline-flex rounded-xl bg-[var(--surface-container-low)] px-4 py-2.5 font-headline text-sm font-bold text-[var(--primary)]"
+                        href="/teams"
+                      >
+                        Open Teams Workspace
+                      </Link>
+                    </article>
                   </div>
-                  <h2 className="mt-5 font-headline text-lg font-bold">Saved Team Slots</h2>
-                  <p className="mt-2 text-sm leading-6 text-[var(--on-surface-variant)]">
-                    PostgreSQL-backed team storage is the next backend slice. The layout is already prepared for multi-team management and comparisons.
-                  </p>
-                  <Link
-                    className="mt-6 inline-flex rounded-xl bg-[var(--surface-container-low)] px-4 py-2.5 font-headline text-sm font-bold text-[var(--primary)]"
-                    href="/teams"
-                  >
-                    Open Teams Workspace
-                  </Link>
-                </article>
-              </div>
+                </>
+              ) : (
+                <section className="card-shadow rounded-[1.5rem] bg-white p-8">
+                  <div className="max-w-3xl">
+                    <div className="font-label text-[11px] font-bold uppercase tracking-[0.32em] text-[var(--secondary)]">
+                      Empty Workspace
+                    </div>
+                    <h2 className="mt-3 font-headline text-3xl font-extrabold tracking-tight">
+                      Start with a blank team builder
+                    </h2>
+                    <p className="mt-4 text-base leading-7 text-[var(--on-surface-variant)]">
+                      The app now opens without demo saved teams. Create a fresh shell or paste a Showdown export so new users start from a clean workspace.
+                    </p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <Link
+                        className="rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-container)] px-6 py-3 font-headline text-sm font-bold text-white"
+                        href="/teams?compose=1"
+                      >
+                        Create First Team
+                      </Link>
+                      <Link
+                        className="rounded-2xl bg-[var(--secondary-fixed)] px-5 py-3 font-headline text-sm font-bold text-[var(--secondary)]"
+                        href="/teams#import-lab"
+                      >
+                        Import from Showdown
+                      </Link>
+                    </div>
+                  </div>
+                </section>
+              )}
 
               <ShowdownImportPanel />
 

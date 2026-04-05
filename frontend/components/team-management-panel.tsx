@@ -22,7 +22,7 @@ export function TeamManagementPanel({
 }) {
   const router = useRouter();
   const [name, setName] = useState(team?.name ?? "");
-  const [format, setFormat] = useState(team?.format ?? "Regulation H");
+  const [format, setFormat] = useState(team?.format ?? "");
   const [archetype, setArchetype] = useState(team?.archetype ?? "Balance");
   const [notes, setNotes] = useState(team?.notes ?? "");
   const [tags, setTags] = useState(team?.tags.join(", ") ?? "");

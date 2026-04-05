@@ -32,7 +32,6 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Showdown import parser endpoint implemented
 - Showdown import UI implemented
 - PostgreSQL team storage added
-- Seed teams loaded into database at startup
 - Team list and team detail pages wired to persisted data
 - Team CRUD for metadata added
   - create blank team
@@ -51,6 +50,9 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Meta snapshots can now be imported and activated from the Meta workspace
 - Tournament-result snapshot automation is now live through Victory Road URL imports
 - Common archetype plans and a Top 5 Teams page are now live from the active snapshot
+- Frontend linting is now wired through ESLint and passes in Docker
+- Backend smoke tests now run through pytest and pass in Docker
+- The app now starts with an empty saved-team workspace so handoff users begin from a blank builder instead of seeded demo teams
 
 ### In Progress
 
@@ -59,6 +61,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Snapshot-management UX can still be polished, but the core import/activate flow is now functional
 - Tournament-result ingestion is now the primary automation path; Showdown usage can remain a secondary future signal
 - A dedicated Showdown engine service now validates and normalizes teams for builder checks and simulation preflight
+- Handoff polish is underway around empty states, QA tooling, and general readiness for new users
 - Most remaining work is polish, deeper heuristics, and simulation accuracy rather than missing core workflow pages
 
 ### Not Started
@@ -80,6 +83,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - See inline validation feedback for invalid or conflicting slot data
 - Parse Showdown exports
 - Save imported Showdown teams
+- Start from an empty saved-team workspace on first run
 - Load deterministic structural analysis on each saved team detail page
 - Open the dedicated Analysis desk for a specific saved team
 - Load the active persisted meta snapshot in the Meta workspace
@@ -89,6 +93,8 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Import and activate meta snapshots through the Meta workspace
 - Import tournament-result snapshots from Victory Road event URLs
 - Run app in Docker
+- Run frontend linting in Docker
+- Run backend smoke tests in Docker
 - Search teams from the top navigation search form
 - Navigate between dashboard, teams, analysis, meta, and testing routes
 
@@ -239,8 +245,8 @@ Progress:
 ## Last Updated Snapshot
 
 - Current active milestone: Post-MVP Polish
-- Last completed milestone: Direct Showdown simulation for both pasted opponents and full-set top-meta snapshots
-- Current progress: the full requested app loop is now live, including saved teams, Showdown import, analysis, stored snapshots, matchup planning, Showdown-backed validation, tournament-result ingestion, and direct Showdown execution for both pasted and top-meta simulation runs when full sets are available
+- Last completed milestone: QA pass plus clean empty first-run team workspace
+- Current progress: the full requested app loop is now live, including saved teams, Showdown import, analysis, stored snapshots, matchup planning, Showdown-backed validation, tournament-result ingestion, direct Showdown execution for both pasted and top-meta simulation runs when full sets are available, and handoff-safe empty states
 - Current next recommendation: keep tournament results as the primary meta-snapshot source and treat further work as quality improvements rather than missing core scope
 
 ## Notes

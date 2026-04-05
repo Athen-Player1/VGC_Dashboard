@@ -12,6 +12,7 @@ Dockerized web app for building, saving, analyzing, comparing, and testing Pokem
 ## Current Features
 
 - Save and manage multiple VGC teams
+- Start from an empty saved-team workspace on first run
 - Import teams from Pokemon Showdown export text
 - Edit full six-slot team shells
 - Run deterministic team weakness and role analysis
@@ -34,6 +35,13 @@ Then open:
 
 - Frontend: `http://localhost:3000`
 - API docs: `http://localhost:8000/docs`
+
+## Quality Checks
+
+```bash
+docker compose exec -T web npm run lint
+docker compose exec -T api pytest
+```
 
 ## Notes
 

@@ -4,7 +4,6 @@ from uuid import uuid4
 
 from fastapi import HTTPException
 
-from app.data.sample_data import dashboard_data
 from app.db import get_db_connection, serialize_json
 from app.models.schemas import (
     ShowdownPokemon,
@@ -67,36 +66,8 @@ def _normalize_member(member: TeamMemberInput | dict[str, Any]) -> dict[str, Any
     }
 
 
-def _seed_teams_if_needed() -> None:
-    with get_db_connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) AS count FROM teams")
-            result = cursor.fetchone()
-            if result and result["count"] > 0:
-                return
-
-            for team in dashboard_data["teams"]:
-                cursor.execute(
-                    """
-                    INSERT INTO teams (id, name, format, archetype, elo, notes, tags, members)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb, %s::jsonb)
-                    ON CONFLICT (id) DO NOTHING
-                    """,
-                    (
-                        team["id"],
-                        team["name"],
-                        team["format"],
-                        team["archetype"],
-                        team.get("elo"),
-                        team["notes"],
-                        serialize_json(team.get("tags", [])),
-                        serialize_json(team.get("members", [])),
-                    ),
-                )
-
-
 def initialize_team_store() -> None:
-    _seed_teams_if_needed()
+    return None
 
 
 def list_teams() -> list[dict[str, Any]]:

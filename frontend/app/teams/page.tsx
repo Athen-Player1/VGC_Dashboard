@@ -59,7 +59,7 @@ export default async function TeamsPage({
           </div>
         </div>
 
-        {params.compose ? (
+        {params.compose || teams.length === 0 ? (
           <TeamManagementPanel mode="create" />
         ) : null}
 
@@ -112,7 +112,9 @@ export default async function TeamsPage({
           <section className="rounded-[1.25rem] bg-white p-8 text-center shadow-sm">
             <h2 className="font-headline text-2xl font-bold">No matching teams</h2>
             <p className="mt-3 text-sm text-[var(--on-surface-variant)]">
-              Try a different search term or import a new Showdown export below.
+              {query
+                ? "Try a different search term or import a new Showdown export below."
+                : "Start with a blank team shell or paste a Showdown export below."}
             </p>
           </section>
         ) : null}

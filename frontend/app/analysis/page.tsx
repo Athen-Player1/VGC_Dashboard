@@ -106,6 +106,20 @@ export default async function AnalysisPage({
               );
             })}
           </div>
+          {data.teams.length === 0 ? (
+            <div className="mt-6 rounded-[1.25rem] bg-[var(--surface-container-low)] p-6">
+              <h3 className="font-headline text-xl font-bold">No saved teams yet</h3>
+              <p className="mt-3 text-sm leading-6 text-[var(--on-surface-variant)]">
+                Create a blank team shell or import a Showdown export first. The analysis desk stays tied to saved teams so recommendations remain explainable.
+              </p>
+              <Link
+                className="mt-5 inline-flex rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-container)] px-6 py-3 font-headline text-sm font-bold text-white"
+                href="/teams?compose=1"
+              >
+                Create First Team
+              </Link>
+            </div>
+          ) : null}
         </section>
 
         {selectedAnalysis ? <TeamAnalysisPanel analysis={selectedAnalysis} /> : null}

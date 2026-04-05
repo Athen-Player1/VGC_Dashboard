@@ -130,6 +130,29 @@ export default async function MetaPage({
           </article>
         </section>
 
+        {!selectedTeam ? (
+          <section className="rounded-[1.5rem] bg-white p-8 shadow-sm">
+            <h2 className="font-headline text-2xl font-bold">Pick a saved team for comparison</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--on-surface-variant)]">
+              Meta snapshots are loaded and ready, but matchup summaries become much more useful once you select a saved team. Start with a blank shell or import one from Showdown if this is a fresh workspace.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                className="rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-container)] px-6 py-3 font-headline text-sm font-bold text-white"
+                href="/teams?compose=1"
+              >
+                Create First Team
+              </Link>
+              <Link
+                className="rounded-2xl bg-[var(--secondary-fixed)] px-5 py-3 font-headline text-sm font-bold text-[var(--secondary)]"
+                href="/teams#import-lab"
+              >
+                Import Team
+              </Link>
+            </div>
+          </section>
+        ) : null}
+
         {selectedTeam && matchupSummaries ? (
           <MatchupSummaryPanel matchups={matchupSummaries} teamName={selectedTeam.name} />
         ) : null}
