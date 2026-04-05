@@ -17,6 +17,30 @@ function statusBadge(status: SimulationJob["status"]) {
   return "bg-[var(--surface-container-low)] text-[var(--on-surface-variant)]";
 }
 
+function engineBadge(engine?: string) {
+  if (engine === "showdown-random-ai-v1") {
+    return "bg-[var(--secondary-fixed)] text-[var(--secondary)]";
+  }
+
+  if (engine === "heuristic-v1") {
+    return "bg-[var(--tertiary-container)] text-[var(--on-tertiary-container)]";
+  }
+
+  return "bg-[var(--surface-container-low)] text-[var(--on-surface-variant)]";
+}
+
+function engineLabel(engine?: string) {
+  if (engine === "showdown-random-ai-v1") {
+    return "Showdown Stream";
+  }
+
+  if (engine === "heuristic-v1") {
+    return "Heuristic";
+  }
+
+  return "Unknown";
+}
+
 export function SimulationControlPanel({
   teams,
   jobs: initialJobs,
@@ -119,6 +143,14 @@ export function SimulationControlPanel({
           Showdown import. Jobs run behind the scenes in the worker container and save their
           summaries here.
         </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <span className="rounded-full bg-[var(--secondary-fixed)] px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--secondary)]">
+            Input Team = Showdown Stream
+          </span>
+          <span className="rounded-full bg-[var(--tertiary-container)] px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--on-tertiary-container)]">
+            Top Meta = Heuristic Until Full Sets Exist
+          </span>
+        </div>
         {error ? <p className="mt-4 text-sm font-semibold text-[var(--error)]">{error}</p> : null}
 
         <div className="mt-6 space-y-5">
@@ -288,11 +320,20 @@ export function SimulationControlPanel({
                       {job.requestedGames} games • {job.id}
                     </div>
                   </div>
-                  <span
-                    className={`rounded-full px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.18em] ${statusBadge(job.status)}`}
-                  >
-                    {job.status}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span
+                      className={`rounded-full px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.18em] ${statusBadge(job.status)}`}
+                    >
+                      {job.status}
+                    </span>
+                    {job.summary.simulationEngine ? (
+                      <span
+                        className={`rounded-full px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.18em] ${engineBadge(job.summary.simulationEngine)}`}
+                      >
+                        {engineLabel(job.summary.simulationEngine)}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
 
                 {job.status === "completed" ? (
@@ -313,9 +354,13 @@ export function SimulationControlPanel({
                         Repeated Issues
                       </div>
                       <div className="mt-3 space-y-2 text-sm text-[var(--on-surface-variant)]">
-                        {(job.summary.repeatedIssues ?? []).slice(0, 2).map((issue) => (
-                          <p key={issue}>{issue}</p>
-                        ))}
+                        {(job.summary.repeatedIssues ?? []).length > 0 ? (
+                          (job.summary.repeatedIssues ?? []).slice(0, 2).map((issue) => (
+                            <p key={issue}>{issue}</p>
+                          ))
+                        ) : (
+                          <p>No repeated issue cluster was flagged in this batch.</p>
+                        )}
                       </div>
                     </div>
                     <div className="rounded-2xl bg-white p-4 md:col-span-2">
@@ -340,6 +385,37 @@ export function SimulationControlPanel({
                       {job.summary.engineNote ? (
                         <p className="mt-4 text-xs text-[var(--outline)]">{job.summary.engineNote}</p>
                       ) : null}
+                    </div>
+                    <div className="rounded-2xl bg-white p-4 md:col-span-2">
+                      <div className="font-label text-[10px] uppercase tracking-[0.22em] text-[var(--outline)]">
+                        Sample Game Notes
+                      </div>
+                      <div className="mt-3 space-y-3">
+                        {(job.summary.sampleGames ?? []).slice(0, 4).map((sample) => (
+                          <div
+                            key={`${job.id}-${sample.game}`}
+                            className="rounded-xl bg-[var(--surface-container-low)] px-4 py-3"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="font-headline text-sm font-bold">
+                                Game {sample.game}
+                              </div>
+                              <span
+                                className={`rounded-full px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.18em] ${
+                                  sample.result === "win"
+                                    ? "bg-[var(--secondary-fixed)] text-[var(--secondary)]"
+                                    : "bg-[var(--error-container)] text-[var(--error)]"
+                                }`}
+                              >
+                                {sample.result}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm leading-6 text-[var(--on-surface-variant)]">
+                              {sample.note}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ) : job.status === "failed" ? (
