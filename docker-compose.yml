@@ -22,6 +22,16 @@ services:
     depends_on:
       - db
 
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m app.sim_worker
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/vgc_dashboard
+    depends_on:
+      - db
+
   db:
     image: postgres:16-alpine
     restart: unless-stopped

@@ -4,6 +4,7 @@ import {
   MatchupSummary,
   MetaSnapshot,
   PokemonSlot,
+  SimulationJob,
   Team,
   TeamAnalysis
 } from "./types";
@@ -206,4 +207,37 @@ export async function deleteTeam(teamId: string): Promise<void> {
   if (!response.ok) {
     throw new Error("Failed to delete team");
   }
+}
+
+export async function getSimulationJobs(): Promise<SimulationJob[]> {
+  const response = await fetch(`${API_BASE_URL}/simulation/jobs`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load simulation jobs");
+  }
+
+  return response.json();
+}
+
+export async function createSimulationJob(payload: {
+  teamId: string;
+  opponentMode: "top_meta" | "input_team";
+  requestedGames: number;
+  showdownText?: string;
+}): Promise<SimulationJob> {
+  const response = await fetch(`${API_BASE_URL}/simulation/jobs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create simulation job");
+  }
+
+  return response.json();
 }

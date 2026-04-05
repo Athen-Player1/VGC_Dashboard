@@ -179,3 +179,26 @@ class ArchetypeMatchupResponse(BaseModel):
     focus_points: list[str] = Field(default_factory=list)
     suggested_leads: list[str] = Field(default_factory=list)
     game_plan: list[str] = Field(default_factory=list)
+
+
+class SimulationJobCreateRequest(BaseModel):
+    teamId: str = Field(min_length=1)
+    opponentMode: str = Field(pattern="^(top_meta|input_team)$")
+    requestedGames: int = Field(default=10, ge=1, le=50)
+    showdownText: str | None = None
+
+
+class SimulationJobResponse(BaseModel):
+    id: str
+    teamId: str
+    teamName: str
+    opponentMode: str
+    opponentLabel: str
+    requestedGames: int
+    completedGames: int
+    status: str
+    createdAt: str
+    startedAt: str | None = None
+    completedAt: str | None = None
+    summary: dict = Field(default_factory=dict)
+    errorMessage: str | None = None

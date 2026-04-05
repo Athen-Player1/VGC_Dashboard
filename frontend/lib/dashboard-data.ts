@@ -2,6 +2,7 @@ import {
   getActiveMetaSnapshot,
   getDashboardData,
   getMetaSnapshots,
+  getSimulationJobs,
   getTeamArchetypeMatchups,
   getTeam,
   getTeamAnalysis,
@@ -12,6 +13,7 @@ import {
   DashboardData,
   MatchupSummary,
   MetaSnapshot,
+  SimulationJob,
   Team,
   TeamAnalysis
 } from "./types";
@@ -279,5 +281,13 @@ export async function loadTeamArchetypeMatchups(
     return await getTeamArchetypeMatchups(teamId);
   } catch {
     return undefined;
+  }
+}
+
+export async function loadSimulationJobs(): Promise<SimulationJob[]> {
+  try {
+    return await getSimulationJobs();
+  } catch {
+    return [];
   }
 }

@@ -1,6 +1,6 @@
 # VGC Dashboard
 
-Dockerized web app for building, saving, and analyzing Pokemon VGC teams.
+Dockerized web app for building, saving, analyzing, comparing, and testing Pokemon VGC teams.
 
 ## Stack
 
@@ -9,14 +9,16 @@ Dockerized web app for building, saving, and analyzing Pokemon VGC teams.
 - Database: PostgreSQL
 - Orchestration: Docker Compose
 
-## Planned Features
+## Current Features
 
-- Save multiple VGC teams
+- Save and manage multiple VGC teams
 - Import teams from Pokemon Showdown export text
-- Team weakness and role analysis
-- Compare against top meta teams by format snapshot
-- Generate matchup plans against common teams
-- Later-phase automated battle simulator
+- Edit full six-slot team shells
+- Run deterministic team weakness and role analysis
+- Import dated meta snapshots, including Victory Road tournament pages
+- Compare saved teams against the active snapshot
+- Generate matchup plans against top teams and common archetypes
+- Queue background 10-game simulation batches against the top meta team or a pasted Showdown team
 
 ## Run
 
@@ -28,3 +30,8 @@ Then open:
 
 - Frontend: `http://localhost:3000`
 - API docs: `http://localhost:8000/docs`
+
+## Notes
+
+- The simulation lane is currently an MVP background workflow using a stored heuristic runner.
+- The architecture is set up so a fuller Pokemon Showdown engine can replace the core simulator later without rewriting the app shell.

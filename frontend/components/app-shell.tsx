@@ -124,13 +124,13 @@ export function AppShell({
         </nav>
         <div className="mt-auto rounded-2xl bg-[var(--surface-container-low)] p-4">
           <div className="font-label text-[10px] uppercase tracking-[0.28em] text-[var(--outline)]">
-            Phase One
+            Core Loop Live
           </div>
           <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[var(--surface-container-high)]">
-            <div className="h-full w-3/5 rounded-full bg-[var(--primary)]" />
+            <div className="h-full w-full rounded-full bg-[var(--primary)]" />
           </div>
           <p className="mt-2 text-xs text-[var(--on-surface-variant)]">
-            Dashboard navigation, import workflow, and route wiring are active.
+            Builder, analysis, meta snapshots, matchup planning, and simulation jobs are active.
           </p>
         </div>
       </aside>

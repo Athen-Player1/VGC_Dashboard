@@ -61,6 +61,27 @@ def init_db() -> None:
                 )
                 """
             )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS simulation_jobs (
+                    id TEXT PRIMARY KEY,
+                    team_id TEXT NOT NULL,
+                    team_name TEXT NOT NULL,
+                    opponent_mode TEXT NOT NULL,
+                    opponent_label TEXT NOT NULL,
+                    opponent_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+                    requested_games INTEGER NOT NULL DEFAULT 10,
+                    completed_games INTEGER NOT NULL DEFAULT 0,
+                    status TEXT NOT NULL DEFAULT 'queued',
+                    summary JSONB NOT NULL DEFAULT '{}'::jsonb,
+                    error_message TEXT,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    started_at TIMESTAMPTZ,
+                    completed_at TIMESTAMPTZ,
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
+            )
 
 
 def serialize_json(value: object) -> str:

@@ -115,3 +115,36 @@ export type ArchetypeMatchup = {
   suggested_leads: string[];
   game_plan: string[];
 };
+
+export type SimulationJob = {
+  id: string;
+  teamId: string;
+  teamName: string;
+  opponentMode: "top_meta" | "input_team";
+  opponentLabel: string;
+  requestedGames: number;
+  completedGames: number;
+  status: "queued" | "running" | "completed" | "failed";
+  createdAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  summary: {
+    teamName?: string;
+    opponentLabel?: string;
+    gamesRequested?: number;
+    wins?: number;
+    losses?: number;
+    winRate?: number;
+    topThreats?: string[];
+    repeatedIssues?: string[];
+    recommendations?: string[];
+    sampleGames?: Array<{
+      game: number;
+      result: "win" | "loss";
+      note: string;
+    }>;
+    simulationEngine?: string;
+    engineNote?: string;
+  };
+  errorMessage?: string | null;
+};

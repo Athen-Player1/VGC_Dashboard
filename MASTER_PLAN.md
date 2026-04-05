@@ -56,19 +56,13 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 
 - Builder UX polish is underway so editing feels closer to a real drafting workflow
 - Expanding the deterministic analysis engine beyond the first structural pass
-- Reusing analysis outputs across more product surfaces before deeper matchup planning work begins
-- Building compare-vs-meta behavior on top of persisted snapshot data
-- Turning compare output into fuller matchup plans with better lead and danger heuristics
-- Adding practical research hooks so moveset work can jump directly into Smogon references
 - Snapshot-management UX can still be polished, but the core import/activate flow is now functional
 - Tournament-result ingestion is now the primary automation path; Showdown usage can remain a secondary future signal
-- Most remaining work is polish, deeper heuristics, and future automation rather than missing core workflow pages
+- Most remaining work is polish, deeper heuristics, and simulation accuracy rather than missing core workflow pages
 
 ### Not Started
 
-- Type/role/synergy analysis engine
-- Meta snapshot persistence and admin workflow
-- Background battle simulator
+- Full Pokemon Showdown engine integration for battle-accurate background sims
 
 ## Working Features Right Now
 
@@ -142,7 +136,7 @@ Progress:
 
 Goal: provide deterministic recommendations and weakness reports.
 
-Status: in progress
+Status: complete for the MVP product scope
 
 Tasks:
 
@@ -212,7 +206,7 @@ Progress:
 
 Goal: add the deferred battle simulator without forcing a rewrite.
 
-Status: explicitly deferred until core product is complete
+Status: in progress
 
 Tasks:
 
@@ -222,24 +216,33 @@ Tasks:
 - stored win/loss summaries
 - recurring weakness reporting
 
+Progress:
+
+- background simulation jobs are now persisted in PostgreSQL
+- a dedicated worker service is now part of Docker Compose
+- the Testing page now launches 10-game queued runs against the active top meta team or a pasted Showdown opponent
+- completed runs now store win/loss results, repeated issues, top threats, and follow-up recommendations
+- the current MVP runner is heuristic and intentionally shaped so a full Pokemon Showdown battle engine can replace the core runner later
+
 ## Immediate Next Steps
 
-1. Keep polishing builder ergonomics around species/forms and slot editing flow.
-2. Expand the analysis engine with richer role and matchup heuristics.
-3. Polish snapshot-management UX and extend web-ingestion helpers beyond Victory Road.
-4. Add secondary Showdown-based trend ingestion only if it improves, not replaces, tournament snapshots.
+1. Replace the heuristic simulation core with a fuller Pokemon Showdown battle-engine integration.
+2. Keep polishing builder ergonomics around species/forms and slot editing flow.
+3. Expand the analysis engine with richer role and matchup heuristics.
+4. Polish snapshot-management UX and extend web-ingestion helpers beyond Victory Road.
+5. Add secondary Showdown-based trend ingestion only if it improves, not replaces, tournament snapshots.
 
 ## Last Updated Snapshot
 
-- Current active milestone: Core App Polish
-- Last completed milestone: Matchup Planning
-- Current progress: the non-simulator core app loop is complete, including builder, analysis, persisted snapshots, tournament-result imports, top-team pages, archetype plans, and matchup planning
-- Current next recommendation: keep tournament results as the primary meta-snapshot source and only add Showdown as a supplementary trend layer
+- Current active milestone: Post-MVP Polish
+- Last completed milestone: Simulation MVP
+- Current progress: the full requested app loop is now live, including saved teams, Showdown import, analysis, stored snapshots, matchup planning, and background 10-game simulation runs
+- Current next recommendation: keep tournament results as the primary meta-snapshot source and use Pokemon Showdown next as the battle-engine target for more accurate simulation
 
 ## Notes
 
 - Meta data should be snapshot-based and dated, not hardcoded as universally current.
 - When move recommendations and suggested sets are added, Smogon should be used as the primary moveset reference source.
 - Tournament results are a better primary source for automated meta snapshots than Showdown ladder data; Showdown should be treated as supplemental usage context.
-- The battle simulator remains a later-phase feature by design.
+- The current simulation lane is an MVP: queued, stored, and useful for workflow testing, but not yet battle-accurate in the way a full Pokemon Showdown engine integration would be.
 - This document is intended to stay concise and operational rather than become a design essay.
