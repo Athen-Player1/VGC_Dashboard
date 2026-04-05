@@ -123,6 +123,27 @@ export async function activateMetaSnapshot(snapshotId: string): Promise<MetaSnap
   return response.json();
 }
 
+export async function importVictoryRoadSnapshot(payload: {
+  url: string;
+  format: string;
+  snapshotDate?: string;
+  active: boolean;
+}): Promise<MetaSnapshot> {
+  const response = await fetch(`${API_BASE_URL}/meta/import/victory-road`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to import Victory Road snapshot");
+  }
+
+  return response.json();
+}
+
 type TeamMutationPayload = {
   name: string;
   format: string;

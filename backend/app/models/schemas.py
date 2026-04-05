@@ -149,6 +149,13 @@ class MetaSnapshotCreateRequest(BaseModel):
     metaTeams: list[MetaTeamResponse] = Field(default_factory=list)
 
 
+class VictoryRoadImportRequest(BaseModel):
+    url: str = Field(min_length=1)
+    format: str = Field(min_length=1, max_length=120)
+    snapshotDate: str | None = Field(default=None, min_length=10, max_length=10)
+    active: bool = False
+
+
 class MatchupSummaryResponse(BaseModel):
     meta_team_id: str
     meta_team_name: str

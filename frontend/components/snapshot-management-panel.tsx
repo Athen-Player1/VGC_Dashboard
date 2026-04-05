@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { activateMetaSnapshot, createMetaSnapshot } from "@/lib/api";
+import { activateMetaSnapshot, createMetaSnapshot, importVictoryRoadSnapshot } from "@/lib/api";
 import { MetaSnapshot } from "@/lib/types";
 
 const sampleTemplate = `{
@@ -37,6 +37,9 @@ const sampleTemplate = `{
 export function SnapshotManagementPanel({ snapshots }: { snapshots: MetaSnapshot[] }) {
   const router = useRouter();
   const [draft, setDraft] = useState(sampleTemplate);
+  const [victoryRoadUrl, setVictoryRoadUrl] = useState("");
+  const [victoryRoadFormat, setVictoryRoadFormat] = useState("Regulation I Snapshot");
+  const [victoryRoadDate, setVictoryRoadDate] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
   const [error, setError] = useState("");
 
@@ -66,6 +69,29 @@ export function SnapshotManagementPanel({ snapshots }: { snapshots: MetaSnapshot
     } catch (caughtError) {
       setStatus("error");
       setError(caughtError instanceof Error ? caughtError.message : "Failed to activate snapshot");
+    }
+  }
+
+  async function handleVictoryRoadImport() {
+    setStatus("saving");
+    setError("");
+
+    try {
+      await importVictoryRoadSnapshot({
+        url: victoryRoadUrl,
+        format: victoryRoadFormat,
+        snapshotDate: victoryRoadDate || undefined,
+        active: false
+      });
+      setStatus("idle");
+      setVictoryRoadUrl("");
+      setVictoryRoadDate("");
+      router.refresh();
+    } catch (caughtError) {
+      setStatus("error");
+      setError(
+        caughtError instanceof Error ? caughtError.message : "Failed to import Victory Road snapshot"
+      );
     }
   }
 
@@ -129,6 +155,42 @@ export function SnapshotManagementPanel({ snapshots }: { snapshots: MetaSnapshot
         >
           {status === "saving" ? "Saving Snapshot..." : "Create Snapshot"}
         </button>
+
+        <div className="mt-8 border-t border-[var(--outline-variant)] pt-8">
+          <h3 className="font-headline text-xl font-bold">Import From Victory Road</h3>
+          <p className="mt-2 text-sm text-[var(--on-surface-variant)]">
+            Tournament-result pages are the best automation target for dated snapshots. Paste a
+            Victory Road event URL and the app will build a snapshot from the top-cut table.
+          </p>
+          <div className="mt-5 space-y-4">
+            <input
+              className="w-full rounded-2xl border border-[var(--outline-variant)] bg-[var(--surface-container-low)] px-4 py-3 text-sm outline-none focus:border-[var(--secondary)]"
+              onChange={(event) => setVictoryRoadUrl(event.target.value)}
+              placeholder="https://victoryroad.pro/2026-seville/"
+              value={victoryRoadUrl}
+            />
+            <input
+              className="w-full rounded-2xl border border-[var(--outline-variant)] bg-[var(--surface-container-low)] px-4 py-3 text-sm outline-none focus:border-[var(--secondary)]"
+              onChange={(event) => setVictoryRoadFormat(event.target.value)}
+              placeholder="Regulation I Snapshot"
+              value={victoryRoadFormat}
+            />
+            <input
+              className="w-full rounded-2xl border border-[var(--outline-variant)] bg-[var(--surface-container-low)] px-4 py-3 text-sm outline-none focus:border-[var(--secondary)]"
+              onChange={(event) => setVictoryRoadDate(event.target.value)}
+              placeholder="2026-04-05 (optional override)"
+              value={victoryRoadDate}
+            />
+            <button
+              className="rounded-2xl bg-[var(--secondary-fixed)] px-6 py-3 font-headline text-sm font-bold text-[var(--secondary)] disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={status === "saving" || !victoryRoadUrl.trim() || !victoryRoadFormat.trim()}
+              onClick={handleVictoryRoadImport}
+              type="button"
+            >
+              {status === "saving" ? "Importing..." : "Import Victory Road Snapshot"}
+            </button>
+          </div>
+        </div>
       </article>
     </section>
   );

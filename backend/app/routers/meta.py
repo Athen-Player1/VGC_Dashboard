@@ -1,12 +1,17 @@
 from fastapi import APIRouter
 
-from app.models.schemas import MetaSnapshotCreateRequest, MetaSnapshotResponse
+from app.models.schemas import (
+    MetaSnapshotCreateRequest,
+    MetaSnapshotResponse,
+    VictoryRoadImportRequest,
+)
 from app.services.meta_store import (
     activate_meta_snapshot,
     create_meta_snapshot,
     get_active_meta_snapshot,
     list_meta_snapshots,
 )
+from app.services.victory_road_import import import_victory_road_snapshot
 
 router = APIRouter(prefix="/meta", tags=["meta"])
 
@@ -29,3 +34,8 @@ def create_snapshot(payload: MetaSnapshotCreateRequest) -> MetaSnapshotResponse:
 @router.post("/snapshots/{snapshot_id}/activate", response_model=MetaSnapshotResponse)
 def activate_snapshot(snapshot_id: str) -> MetaSnapshotResponse:
     return MetaSnapshotResponse.model_validate(activate_meta_snapshot(snapshot_id))
+
+
+@router.post("/import/victory-road", response_model=MetaSnapshotResponse)
+def import_victory_road(payload: VictoryRoadImportRequest) -> MetaSnapshotResponse:
+    return MetaSnapshotResponse.model_validate(import_victory_road_snapshot(payload))

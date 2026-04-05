@@ -49,6 +49,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - First-pass compare-vs-meta summaries now render for a selected saved team against active snapshot teams
 - Weakness chart and richer matchup-plan fields are now live in the core team and meta workflows
 - Meta snapshots can now be imported and activated from the Meta workspace
+- Tournament-result snapshot automation is now live through Victory Road URL imports
 
 ### In Progress
 
@@ -59,6 +60,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Turning compare output into fuller matchup plans with better lead and danger heuristics
 - Adding practical research hooks so moveset work can jump directly into Smogon references
 - Snapshot-management UX can still be polished, but the core import/activate flow is now functional
+- Tournament-result ingestion is now the primary automation path; Showdown usage can remain a secondary future signal
 
 ### Not Started
 
@@ -89,6 +91,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - View a full weakness chart for a saved team
 - Open Smogon Dex and Smogon Search links directly from team builder slots
 - Import and activate meta snapshots through the Meta workspace
+- Import tournament-result snapshots from Victory Road event URLs
 - Run app in Docker
 - Search teams from the top navigation search form
 - Navigate between dashboard, teams, analysis, meta, and testing routes
@@ -178,6 +181,7 @@ Progress:
 - selected teams now receive first-pass matchup summaries against the active snapshot teams
 - matchup summaries now include preserve targets, win conditions, tera notes, and danger checklists
 - snapshots can now be imported and activated without manual database edits
+- Victory Road event pages can now be converted directly into stored snapshots
 
 ## Phase 5: Matchup Planning
 
@@ -191,6 +195,7 @@ Tasks:
 - preserve targets and win-condition notes
 - danger checklist
 - matchup summaries against common archetypes
+- A page on the top 5 teams
 - matchup summaries against top stored teams
 
 ## Phase 6: Simulation
@@ -211,19 +216,20 @@ Tasks:
 
 1. Keep polishing builder ergonomics around species/forms and slot editing flow.
 2. Expand the analysis engine with richer role and matchup heuristics.
-3. Polish snapshot-management UX and optional web-ingestion helpers.
-4. Keep the simulator deferred until the core non-sim workflow feels complete.
+3. Polish snapshot-management UX and extend web-ingestion helpers beyond Victory Road.
+4. Add secondary Showdown-based trend ingestion only if it improves, not replaces, tournament snapshots.
 
 ## Last Updated Snapshot
 
 - Current active milestone: Analysis Engine
 - Last completed milestone: Team Builder
-- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, a weakness chart, deterministic structural analysis, a team-aware Analysis workspace, persisted meta snapshots, richer compare-vs-meta matchup plans, and in-app snapshot management
-- Current next recommendation: the core non-simulator product loop is in place; remaining work is mostly polish and future automation
+- Current progress: saved teams support six-slot editing, dynamic sprite loading, chip-style move/type editing, validation, a weakness chart, deterministic structural analysis, a team-aware Analysis workspace, persisted meta snapshots, richer compare-vs-meta matchup plans, in-app snapshot management, and Victory Road tournament imports
+- Current next recommendation: keep tournament results as the primary meta-snapshot source and only add Showdown as a supplementary trend layer
 
 ## Notes
 
 - Meta data should be snapshot-based and dated, not hardcoded as universally current.
 - When move recommendations and suggested sets are added, Smogon should be used as the primary moveset reference source.
+- Tournament results are a better primary source for automated meta snapshots than Showdown ladder data; Showdown should be treated as supplemental usage context.
 - The battle simulator remains a later-phase feature by design.
 - This document is intended to stay concise and operational rather than become a design essay.
