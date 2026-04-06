@@ -214,6 +214,18 @@ PIVOT_EXAMPLES = [
     "Volt Switch on Rotom or Miraidon",
     "Flip Turn on Urshifu-Rapid-Strike",
 ]
+DEFENSIVE_TERA_OPTIONS = {
+    "Grass": {"Fire", "Flying", "Steel", "Poison", "Dragon"},
+    "Electric": {"Ground", "Grass", "Dragon"},
+    "Ground": {"Water", "Grass", "Flying", "Bug"},
+    "Water": {"Water", "Grass", "Dragon"},
+    "Fire": {"Water", "Fire", "Dragon", "Rock"},
+    "Ice": {"Fire", "Water", "Steel"},
+    "Fairy": {"Steel", "Fire", "Poison"},
+    "Dragon": {"Fairy", "Steel"},
+    "Rock": {"Fighting", "Ground", "Steel"},
+    "Ghost": {"Dark", "Normal"},
+}
 SPREAD_MOVES = {
     "Heat Wave",
     "Rock Slide",
@@ -314,6 +326,12 @@ def _extract_flags(filled_members: list) -> dict[str, object]:
     moves = Counter(move for member in filled_members for move in member.moves)
     abilities = Counter(member.ability for member in filled_members if member.ability)
     roles = [member.role.lower() for member in filled_members if member.role]
+    speed_control_sources: list[str] = []
+    fake_out_sources: list[str] = []
+    redirection_sources: list[str] = []
+    intimidate_sources: list[str] = []
+    pivot_sources: list[str] = []
+    opener_scores: list[tuple[int, str]] = []
 
     weather_setters: Counter[str] = Counter()
     weather_payoffs: Counter[str] = Counter()
@@ -329,6 +347,8 @@ def _extract_flags(filled_members: list) -> dict[str, object]:
         item = member.item.strip().lower()
         role = member.role.lower()
         name = member.name.lower()
+        member_support_moves = set(member.moves)
+        opener_score = 0
 
         weather = WEATHER_SETTER_ABILITIES.get(ability)
         if weather:
@@ -337,6 +357,10 @@ def _extract_flags(filled_members: list) -> dict[str, object]:
         terrain = TERRAIN_SETTER_ABILITIES.get(ability)
         if terrain:
             terrain_setters[terrain] += 1
+
+        if ability == "Intimidate":
+            intimidate_sources.append(member.name)
+            opener_score += 2
 
         weather_payoff = WEATHER_PAYOFF_ABILITIES.get(ability)
         if weather_payoff:
@@ -353,6 +377,27 @@ def _extract_flags(filled_members: list) -> dict[str, object]:
             terrain_payoffs[terrain_payoff] += 1
             if item != BOOSTER_ITEM:
                 terrain_needs_support[terrain_payoff] += 1
+
+        if any(move in SPEED_CONTROL_MOVES for move in member_support_moves) or any(
+            keyword in role for keyword in ("speed", "tailwind", "trick room")
+        ):
+            speed_control_sources.append(member.name)
+            opener_score += 3
+
+        if "Fake Out" in member_support_moves:
+            fake_out_sources.append(member.name)
+            opener_score += 3
+
+        if member_support_moves.intersection(REDIRECTION_MOVES):
+            redirection_sources.append(member.name)
+            opener_score += 3
+
+        if member_support_moves.intersection(PIVOT_MOVES):
+            pivot_sources.append(member.name)
+            opener_score += 1
+
+        if "Protect" in member_support_moves or "Detect" in member_support_moves:
+            opener_score += 1
 
         for move in member.moves:
             if move in WEATHER_MOVES:
@@ -371,6 +416,8 @@ def _extract_flags(filled_members: list) -> dict[str, object]:
             any(keyword in role for keyword in TRICK_ROOM_PAYOFF_ROLE_KEYWORDS) or name in TRICK_ROOM_PAYOFF_SPECIES
         ):
             trick_room_payoff_count += 1
+
+        opener_scores.append((opener_score, member.name))
 
     weather_speed_control_count = sum(
         count for weather, count in weather_speed_payoffs.items() if weather_setters.get(weather, 0) > 0
@@ -391,10 +438,16 @@ def _extract_flags(filled_members: list) -> dict[str, object]:
     return {
         "protect_count": protect_count,
         "speed_control_count": speed_control_count,
+        "speed_control_sources": speed_control_sources,
         "redirection_count": redirection_count,
+        "redirection_sources": redirection_sources,
         "fake_out_count": fake_out_count,
+        "fake_out_sources": fake_out_sources,
         "intimidate_count": intimidate_count,
+        "intimidate_sources": intimidate_sources,
         "pivot_count": pivot_count,
+        "pivot_sources": pivot_sources,
+        "opener_scores": sorted(opener_scores, key=lambda item: (-item[0], item[1])),
         "spread_pressure_count": spread_pressure_count,
         "tailwind_count": tailwind_count,
         "trick_room_count": trick_room_count,
@@ -666,6 +719,25 @@ def _build_notes(
         strengths.append("The team already shows at least one spread-damage option for board compression.")
 
     _append_mode_notes(strengths, warnings, recommendation_candidates, seen_candidates, flags)
+    _append_support_dependency_notes(
+        warnings,
+        recommendation_candidates,
+        seen_candidates,
+        flags,
+    )
+    _append_lead_burden_notes(
+        filled_members,
+        warnings,
+        recommendation_candidates,
+        seen_candidates,
+        flags,
+    )
+    _append_tera_dependency_notes(
+        filled_members,
+        shared_weaknesses,
+        recommendation_candidates,
+        seen_candidates,
+    )
 
     if flags["speed_control_count"] == 1 and len(filled_members) >= 5:
         add_recommendation(
@@ -888,6 +960,166 @@ def _append_mode_notes(
             confidence=68,
             evidence=["Both weather and terrain setters are present, which can signal split mode identity."],
         )
+
+
+def _append_support_dependency_notes(
+    warnings: list[str],
+    recommendation_candidates: list[dict[str, object]],
+    seen_candidates: set[tuple[str, str]],
+    flags: dict[str, object],
+) -> None:
+    def add_recommendation(
+        priority: int,
+        message: str,
+        *,
+        category: str,
+        severity: str,
+        confidence: int,
+        evidence: list[str] | None = None,
+        affected_members: list[str] | None = None,
+        suggested_fix: str | None = None,
+    ) -> None:
+        key = (category, message)
+        if key in seen_candidates:
+            return
+        seen_candidates.add(key)
+        recommendation_candidates.append(
+            {
+                "priority": priority,
+                "summary": message,
+                "category": category,
+                "severity": severity,
+                "confidence": confidence,
+                "evidence": evidence or [],
+                "affected_members": affected_members or [],
+                "suggested_fix": suggested_fix or message,
+            }
+        )
+
+    dependency_checks = [
+        ("speed-control", "speed control", flags["speed_control_sources"], SUPPORTED_SPEED_CONTROL_EXAMPLES),
+        ("support", "Fake Out", flags["fake_out_sources"], ["Iron Hands", "Incineroar", "Rillaboom"]),
+        ("support", "redirection", flags["redirection_sources"], ["Amoonguss", "Clefairy", "Indeedee-F"]),
+        ("support", "Intimidate", flags["intimidate_sources"], ["Incineroar", "Landorus-Therian", "Gyarados"]),
+    ]
+
+    for category, label, sources, examples in dependency_checks:
+        unique_sources = _dedupe([str(source) for source in sources])
+        if len(unique_sources) != 1:
+            continue
+
+        warnings.append(f"{label.title()} currently leans on a single source: {unique_sources[0]}.")
+        add_recommendation(
+            72 if category == "support" else 78,
+            f"Add a backup {label} line so losing {unique_sources[0]} does not collapse that part of the game plan.",
+            category=category,
+            severity="medium",
+            confidence=85,
+            evidence=[f"Only one {label} source was detected."],
+            affected_members=unique_sources,
+            suggested_fix=_with_examples(
+                f"Layer a second {label} source so the team is less brittle when preview pressure or early trades hit the primary piece.",
+                examples,
+            ),
+        )
+
+
+def _append_lead_burden_notes(
+    filled_members: list,
+    warnings: list[str],
+    recommendation_candidates: list[dict[str, object]],
+    seen_candidates: set[tuple[str, str]],
+    flags: dict[str, object],
+) -> None:
+    if len(filled_members) < 5:
+        return
+
+    opener_scores = [entry for entry in flags["opener_scores"] if entry[0] > 0]
+    if len(opener_scores) < 2:
+        return
+
+    top_pair = opener_scores[:2]
+    third_score = opener_scores[2][0] if len(opener_scores) >= 3 else 0
+    pair_total = top_pair[0][0] + top_pair[1][0]
+    if pair_total < 8 or third_score >= max(4, top_pair[1][0] - 1):
+        return
+
+    pair_names = [top_pair[0][1], top_pair[1][1]]
+    warnings.append(f"Most stable openings appear to flow through {pair_names[0]} + {pair_names[1]}.")
+    message = f"Build at least one secondary opening outside {pair_names[0]} + {pair_names[1]} so preview decisions are less predictable."
+    key = ("lead-plan", message)
+    if key in seen_candidates:
+        return
+    seen_candidates.add(key)
+    recommendation_candidates.append(
+        {
+            "priority": 66,
+            "summary": message,
+            "category": "lead-plan",
+            "severity": "medium",
+            "confidence": 80,
+            "evidence": [
+                f"{pair_names[0]} and {pair_names[1]} score clearly above the rest as opener pieces.",
+                "Few other members show comparable early-turn utility.",
+            ],
+            "affected_members": pair_names,
+            "suggested_fix": _with_examples(
+                "Add another opening pair that still functions if your primary lead core is pressured at preview.",
+                ["a second Fake Out user", "a backup Tailwind or Icy Wind piece", "a pivot that can lead safely into neutral boards"],
+            ),
+        }
+    )
+
+
+def _append_tera_dependency_notes(
+    filled_members: list,
+    shared_weaknesses: list[TypePressure],
+    recommendation_candidates: list[dict[str, object]],
+    seen_candidates: set[tuple[str, str]],
+) -> None:
+    if not shared_weaknesses:
+        return
+
+    primary = shared_weaknesses[0]
+    if primary.weak_count < 3:
+        return
+
+    valid_teras = DEFENSIVE_TERA_OPTIONS.get(primary.type, set())
+    if not valid_teras:
+        return
+
+    tera_pivots = [
+        member.name
+        for member in filled_members
+        if member.teraType and member.teraType.title() in valid_teras
+    ]
+    unique_pivots = _dedupe(tera_pivots)
+    if len(unique_pivots) != 1:
+        return
+
+    message = f"{primary.type} matchups may overtax tera because only {unique_pivots[0]} shows a clear defensive pivot tera for that pressure."
+    key = ("tera-dependency", message)
+    if key in seen_candidates:
+        return
+    seen_candidates.add(key)
+    recommendation_candidates.append(
+        {
+            "priority": 76,
+            "summary": message,
+            "category": "tera-dependency",
+            "severity": "medium",
+            "confidence": 83,
+            "evidence": [
+                f"{primary.weak_count} members are weak to {primary.type}.",
+                f"Only {unique_pivots[0]} has a tera type that clearly patches that weakness.",
+            ],
+            "affected_members": unique_pivots,
+            "suggested_fix": _with_examples(
+                f"Add another natural answer or secondary tera line into {primary.type} so one forced defensive tera is not carrying the whole matchup.",
+                TYPE_PATCH_EXAMPLES.get(primary.type, []),
+            ),
+        }
+    )
 
 
 def _coherent_modes(flags: dict[str, object]) -> list[str]:

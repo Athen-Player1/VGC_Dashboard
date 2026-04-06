@@ -165,6 +165,80 @@ def test_team_analysis_recommendations_include_examples_for_missing_support() ->
     assert "Incineroar or Iron Hands for Fake Out" in support_detail.suggestedFix
 
 
+def test_team_analysis_flags_single_source_support_dependency() -> None:
+    team = TeamResponse(
+        id="one-fake-out",
+        name="One Fake Out",
+        format="Regulation H",
+        archetype="Balance",
+        notes="",
+        members=[
+            _member("Incineroar", item="Safety Goggles", ability="Intimidate", types=["Fire", "Dark"], moves=["Fake Out", "Parting Shot", "Knock Off", "Flare Blitz"], role="Pivot"),
+            _member("Gholdengo", item="Leftovers", ability="Good as Gold", types=["Steel", "Ghost"], moves=["Make It Rain", "Shadow Ball", "Protect", "Nasty Plot"], role="Special breaker"),
+            _member("Hydreigon", item="Life Orb", ability="Levitate", types=["Dark", "Dragon"], moves=["Draco Meteor", "Dark Pulse", "Protect", "Heat Wave"], role="Breaker"),
+            _member("Ogerpon-Wellspring", item="Wellspring Mask", ability="Water Absorb", types=["Grass", "Water"], moves=["Ivy Cudgel", "Horn Leech", "Spiky Shield", "Taunt"], role="Pressure"),
+            _member("Raging Bolt", item="Assault Vest", ability="Protosynthesis", types=["Electric", "Dragon"], moves=["Thunderclap", "Draco Meteor", "Snarl", "Volt Switch"], role="Bulky offense"),
+            _member("Heatran", item="Shuca Berry", ability="Flash Fire", types=["Fire", "Steel"], moves=["Heat Wave", "Flash Cannon", "Earth Power", "Protect"], role="Bulky offense"),
+        ],
+    )
+
+    analysis = build_team_analysis(team)
+
+    assert any("single source" in warning.lower() and "fake out" in warning.lower() for warning in analysis.warnings)
+    support_detail = next(
+        detail for detail in analysis.recommendation_details if detail.category == "support" and "backup fake out line" in detail.summary.lower()
+    )
+    assert support_detail.affectedMembers == ["Incineroar"]
+
+
+def test_team_analysis_flags_overloaded_primary_lead_pair() -> None:
+    team = TeamResponse(
+        id="lead-burden",
+        name="Lead Burden",
+        format="Regulation H",
+        archetype="Balance",
+        notes="",
+        members=[
+            _member("Incineroar", item="Safety Goggles", ability="Intimidate", types=["Fire", "Dark"], moves=["Fake Out", "Parting Shot", "Protect", "Flare Blitz"], role="Pivot"),
+            _member("Tornadus", item="Covert Cloak", ability="Prankster", types=["Flying"], moves=["Tailwind", "Taunt", "Protect", "Bleakwind Storm"], role="Speed control"),
+            _member("Gholdengo", item="Life Orb", ability="Good as Gold", types=["Steel", "Ghost"], moves=["Make It Rain", "Shadow Ball", "Nasty Plot", "Protect"], role="Special breaker"),
+            _member("Dragonite", item="Choice Band", ability="Inner Focus", types=["Dragon", "Flying"], moves=["Extreme Speed", "Ice Spinner", "Low Kick", "Stomping Tantrum"], role="Cleaner"),
+            _member("Heatran", item="Shuca Berry", ability="Flash Fire", types=["Fire", "Steel"], moves=["Heat Wave", "Flash Cannon", "Earth Power", "Protect"], role="Bulky offense"),
+            _member("Rillaboom", item="Miracle Seed", ability="Grassy Surge", types=["Grass"], moves=["Wood Hammer", "Grassy Glide", "Protect", "Knock Off"], role="Support"),
+        ],
+    )
+
+    analysis = build_team_analysis(team)
+
+    lead_detail = next(detail for detail in analysis.recommendation_details if detail.category == "lead-plan")
+    assert "Incineroar + Tornadus" in lead_detail.summary
+    assert lead_detail.affectedMembers == ["Incineroar", "Tornadus"]
+
+
+def test_team_analysis_flags_primary_weakness_tera_dependency() -> None:
+    team = TeamResponse(
+        id="ground-tera-tax",
+        name="Ground Tera Tax",
+        format="Regulation H",
+        archetype="Balance",
+        notes="",
+        members=[
+            _member("Incineroar", item="Safety Goggles", ability="Intimidate", types=["Fire", "Dark"], moves=["Fake Out", "Parting Shot", "Knock Off", "Flare Blitz"], role="Pivot", tera_type="Grass"),
+            _member("Heatran", item="Leftovers", ability="Flash Fire", types=["Fire", "Steel"], moves=["Heat Wave", "Earth Power", "Protect", "Flash Cannon"], role="Bulky offense"),
+            _member("Gholdengo", item="Life Orb", ability="Good as Gold", types=["Steel", "Ghost"], moves=["Make It Rain", "Shadow Ball", "Nasty Plot", "Protect"], role="Special breaker"),
+            _member("Raging Bolt", item="Assault Vest", ability="Protosynthesis", types=["Electric", "Dragon"], moves=["Thunderclap", "Draco Meteor", "Snarl", "Volt Switch"], role="Bulky offense"),
+            _member("Amoonguss", item="Rocky Helmet", ability="Regenerator", types=["Grass", "Poison"], moves=["Rage Powder", "Spore", "Pollen Puff", "Protect"], role="Support"),
+            _member("Ogerpon-Wellspring", item="Wellspring Mask", ability="Water Absorb", types=["Grass", "Water"], moves=["Ivy Cudgel", "Horn Leech", "Spiky Shield", "Follow Me"], role="Support"),
+        ],
+    )
+
+    analysis = build_team_analysis(team)
+
+    tera_detail = next(detail for detail in analysis.recommendation_details if detail.category == "tera-dependency")
+    assert "Ground" in tera_detail.summary
+    assert tera_detail.affectedMembers == ["Incineroar"]
+
+
 @pytest.mark.parametrize(
     ("team", "expected_mode", "forbidden_phrase"),
     [
