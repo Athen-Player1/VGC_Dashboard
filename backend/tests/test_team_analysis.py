@@ -1,3 +1,5 @@
+import pytest
+
 from app.models.schemas import TeamMember, TeamResponse
 from app.services.team_analysis import build_team_analysis
 from app.services.victory_road_import import _build_recommendations
@@ -23,6 +25,16 @@ def _member(
         teraType=tera_type,
         image="",
     )
+
+
+def _assert_coherent_mode(team: TeamResponse, expected_mode: str, forbidden_phrase: str) -> None:
+    analysis = build_team_analysis(team)
+
+    mode_check = next(check for check in analysis.coverage_checks if check.label == "Mode cohesion")
+    assert mode_check.status == "ready"
+    assert expected_mode.lower() in mode_check.detail.lower()
+    assert not any(forbidden_phrase.lower() in item.lower() for item in analysis.recommendations)
+    assert not any(forbidden_phrase.lower() in item.lower() for item in analysis.warnings)
 
 
 def test_team_analysis_marks_coherent_sun_mode_ready() -> None:
@@ -127,6 +139,134 @@ def test_team_analysis_weather_speed_package_counts_as_speed_control() -> None:
     assert speed_check.status == "ready"
     assert "weather-enabled speed packages" in speed_check.detail
     assert not any("Add Icy Wind, Tailwind, Trick Room, Thunder Wave" in item for item in analysis.recommendations)
+    assert any("Examples:" in detail.suggestedFix for detail in analysis.recommendation_details)
+
+
+def test_team_analysis_recommendations_include_examples_for_missing_support() -> None:
+    team = TeamResponse(
+        id="support-gap",
+        name="Support Gap",
+        format="Regulation H",
+        archetype="Balance",
+        notes="",
+        members=[
+            _member("Gholdengo", item="Leftovers", ability="Good as Gold", types=["Steel", "Ghost"], moves=["Make It Rain", "Shadow Ball", "Nasty Plot", "Protect"], role="Special breaker"),
+            _member("Hydreigon", item="Life Orb", ability="Levitate", types=["Dark", "Dragon"], moves=["Draco Meteor", "Dark Pulse", "Heat Wave", "Protect"], role="Breaker"),
+            _member("Rotom-Wash", item="Sitrus Berry", ability="Levitate", types=["Electric", "Water"], moves=["Hydro Pump", "Thunderbolt", "Protect", "Will-O-Wisp"], role="Pivot"),
+            _member("Ogerpon-Wellspring", item="Wellspring Mask", ability="Water Absorb", types=["Grass", "Water"], moves=["Ivy Cudgel", "Horn Leech", "Spiky Shield", "Taunt"], role="Pressure"),
+            _member("Dragonite", item="Choice Band", ability="Inner Focus", types=["Dragon", "Flying"], moves=["Extreme Speed", "Low Kick", "Ice Spinner", "Stomping Tantrum"], role="Cleaner"),
+            _member("Heatran", item="Shuca Berry", ability="Flash Fire", types=["Fire", "Steel"], moves=["Heat Wave", "Flash Cannon", "Earth Power", "Protect"], role="Bulky offense"),
+        ],
+    )
+
+    analysis = build_team_analysis(team)
+
+    support_detail = next(detail for detail in analysis.recommendation_details if detail.category == "support")
+    assert "Incineroar or Iron Hands for Fake Out" in support_detail.suggestedFix
+
+
+@pytest.mark.parametrize(
+    ("team", "expected_mode", "forbidden_phrase"),
+    [
+        (
+            TeamResponse(
+                id="sand-mode",
+                name="Sand Mode",
+                format="Regulation H",
+                archetype="Sand",
+                notes="",
+                members=[
+                    _member("Tyranitar", item="Assault Vest", ability="Sand Stream", types=["Rock", "Dark"], moves=["Rock Slide", "Knock Off", "Low Kick", "Protect"], role="Sand setter"),
+                    _member("Excadrill", item="Clear Amulet", ability="Sand Rush", types=["Ground", "Steel"], moves=["High Horsepower", "Iron Head", "Protect", "Rock Slide"], role="Sand payoff"),
+                    _member("Landorus-Therian", item="Choice Scarf", ability="Intimidate", types=["Ground", "Flying"], moves=["Stomping Tantrum", "U-turn", "Rock Slide", "Tera Blast"], role="Pivot"),
+                    _member("Amoonguss", item="Rocky Helmet", ability="Regenerator", types=["Grass", "Poison"], moves=["Spore", "Rage Powder", "Pollen Puff", "Protect"], role="Support"),
+                    _member("Incineroar", item="Safety Goggles", ability="Intimidate", types=["Fire", "Dark"], moves=["Fake Out", "Parting Shot", "Flare Blitz", "Knock Off"], role="Pivot"),
+                    _member("Raging Bolt", item="Leftovers", ability="Protosynthesis", types=["Electric", "Dragon"], moves=["Thunderclap", "Draco Meteor", "Protect", "Snarl"], role="Bulky offense"),
+                ],
+            ),
+            "sand",
+            "reliable sand setter",
+        ),
+        (
+            TeamResponse(
+                id="snow-mode",
+                name="Snow Mode",
+                format="Regulation H",
+                archetype="Snow",
+                notes="",
+                members=[
+                    _member("Ninetales-Alola", item="Light Clay", ability="Snow Warning", types=["Ice", "Fairy"], moves=["Aurora Veil", "Blizzard", "Moonblast", "Protect"], role="Snow setter"),
+                    _member("Baxcalibur", item="Loaded Dice", ability="Thermal Exchange", types=["Dragon", "Ice"], moves=["Icicle Spear", "Ice Shard", "Protect", "Glaive Rush"], role="Snow payoff"),
+                    _member("Cetitan", item="Assault Vest", ability="Slush Rush", types=["Ice"], moves=["Icicle Crash", "Ice Spinner", "Heavy Slam", "Liquidation"], role="Snow payoff"),
+                    _member("Amoonguss", item="Rocky Helmet", ability="Regenerator", types=["Grass", "Poison"], moves=["Spore", "Rage Powder", "Pollen Puff", "Protect"], role="Support"),
+                    _member("Incineroar", item="Safety Goggles", ability="Intimidate", types=["Fire", "Dark"], moves=["Fake Out", "Parting Shot", "Flare Blitz", "Knock Off"], role="Pivot"),
+                    _member("Urshifu-Rapid-Strike", item="Mystic Water", ability="Unseen Fist", types=["Water", "Fighting"], moves=["Surging Strikes", "Close Combat", "Aqua Jet", "Detect"], role="Breaker"),
+                ],
+            ),
+            "snow",
+            "reliable snow setter",
+        ),
+        (
+            TeamResponse(
+                id="electric-mode",
+                name="Electric Mode",
+                format="Regulation H",
+                archetype="Electric Terrain",
+                notes="",
+                members=[
+                    _member("Miraidon", item="Life Orb", ability="Hadron Engine", types=["Electric", "Dragon"], moves=["Electro Drift", "Draco Meteor", "Protect", "Volt Switch"], role="Setter"),
+                    _member("Iron Hands", item="Assault Vest", ability="Quark Drive", types=["Fighting", "Electric"], moves=["Fake Out", "Drain Punch", "Wild Charge", "Heavy Slam"], role="Terrain payoff"),
+                    _member("Iron Bundle", item="Booster Energy", ability="Quark Drive", types=["Ice", "Water"], moves=["Icy Wind", "Freeze-Dry", "Hydro Pump", "Protect"], role="Speed control"),
+                    _member("Farigiraf", item="Safety Goggles", ability="Armor Tail", types=["Normal", "Psychic"], moves=["Helping Hand", "Hyper Voice", "Protect", "Dazzling Gleam"], role="Support"),
+                    _member("Incineroar", item="Safety Goggles", ability="Intimidate", types=["Fire", "Dark"], moves=["Fake Out", "Parting Shot", "Flare Blitz", "Knock Off"], role="Pivot"),
+                    _member("Landorus-Therian", item="Choice Scarf", ability="Intimidate", types=["Ground", "Flying"], moves=["Stomping Tantrum", "U-turn", "Rock Slide", "Tera Blast"], role="Pivot"),
+                ],
+            ),
+            "electric terrain",
+            "dependable Electric Terrain setter",
+        ),
+        (
+            TeamResponse(
+                id="psychic-mode",
+                name="Psychic Mode",
+                format="Regulation H",
+                archetype="Psychic Terrain",
+                notes="",
+                members=[
+                    _member("Indeedee-F", item="Safety Goggles", ability="Psychic Surge", types=["Psychic", "Normal"], moves=["Follow Me", "Helping Hand", "Protect", "Psychic"], role="Setter"),
+                    _member("Armarouge", item="Life Orb", ability="Flash Fire", types=["Fire", "Psychic"], moves=["Expanding Force", "Armor Cannon", "Protect", "Wide Guard"], role="Terrain payoff"),
+                    _member("Hatterene", item="Leftovers", ability="Magic Bounce", types=["Psychic", "Fairy"], moves=["Dazzling Gleam", "Protect", "Mystical Fire", "Expanding Force"], role="Terrain payoff"),
+                    _member("Incineroar", item="Safety Goggles", ability="Intimidate", types=["Fire", "Dark"], moves=["Fake Out", "Parting Shot", "Flare Blitz", "Knock Off"], role="Pivot"),
+                    _member("Amoonguss", item="Rocky Helmet", ability="Regenerator", types=["Grass", "Poison"], moves=["Spore", "Rage Powder", "Pollen Puff", "Protect"], role="Support"),
+                    _member("Urshifu-Rapid-Strike", item="Mystic Water", ability="Unseen Fist", types=["Water", "Fighting"], moves=["Surging Strikes", "Close Combat", "Aqua Jet", "Detect"], role="Breaker"),
+                ],
+            ),
+            "psychic terrain",
+            "dependable Psychic Terrain setter",
+        ),
+        (
+            TeamResponse(
+                id="room-mode",
+                name="Room Mode",
+                format="Regulation H",
+                archetype="Trick Room",
+                notes="",
+                members=[
+                    _member("Farigiraf", item="Safety Goggles", ability="Armor Tail", types=["Normal", "Psychic"], moves=["Trick Room", "Helping Hand", "Hyper Voice", "Protect"], role="Setter"),
+                    _member("Ursaluna-Bloodmoon", item="Life Orb", ability="Mind's Eye", types=["Ground", "Normal"], moves=["Blood Moon", "Earth Power", "Hyper Voice", "Protect"], role="Slow mode payoff"),
+                    _member("Torkoal", item="Charcoal", ability="Drought", types=["Fire"], moves=["Eruption", "Heat Wave", "Earth Power", "Protect"], role="Endgame"),
+                    _member("Amoonguss", item="Rocky Helmet", ability="Regenerator", types=["Grass", "Poison"], moves=["Spore", "Rage Powder", "Pollen Puff", "Protect"], role="Support"),
+                    _member("Iron Hands", item="Assault Vest", ability="Quark Drive", types=["Fighting", "Electric"], moves=["Fake Out", "Drain Punch", "Wild Charge", "Heavy Slam"], role="Bulky endgame"),
+                    _member("Incineroar", item="Safety Goggles", ability="Intimidate", types=["Fire", "Dark"], moves=["Fake Out", "Parting Shot", "Flare Blitz", "Knock Off"], role="Pivot"),
+                ],
+            ),
+            "trick room",
+            "dedicated Trick Room setter",
+        ),
+    ],
+)
+def test_team_analysis_core_strategies_keep_coherent_modes(team: TeamResponse, expected_mode: str, forbidden_phrase: str) -> None:
+    _assert_coherent_mode(team, expected_mode, forbidden_phrase)
 
 
 def test_victory_road_recommendations_reflect_common_modes() -> None:

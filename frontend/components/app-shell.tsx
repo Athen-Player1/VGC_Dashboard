@@ -40,7 +40,7 @@ const navGroups: NavGroup[] = [
     section: "teams",
     items: [
       { href: "/teams", label: "All Teams", icon: "view_list" },
-      { href: "/teams?compose=1", label: "Create Team", icon: "add_circle" },
+      { href: "/teams?compose=1", label: "Team Builder", icon: "add_circle" },
       { href: "/teams#import-lab", label: "Import Team", icon: "upload" }
     ]
   },

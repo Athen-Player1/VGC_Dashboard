@@ -157,6 +157,63 @@ WEATHER_LABELS = {
     "psychic": "Psychic Terrain",
     "misty": "Misty Terrain",
 }
+MODE_SETTER_EXAMPLES = {
+    "sun": ["Torkoal", "Koraidon", "Sunny Day on Tornadus"],
+    "rain": ["Pelipper", "Kyogre", "Rain Dance on Tornadus"],
+    "sand": ["Tyranitar", "Hippowdon", "Sandstorm on bulky support"],
+    "snow": ["Alolan Ninetales", "Abomasnow", "Snowscape on support"],
+    "electric": ["Miraidon", "Pincurchin", "Electric Surge support"],
+    "grassy": ["Rillaboom", "Grassy Surge support"],
+    "psychic": ["Indeedee-F", "Indeedee-M", "Psychic Surge support"],
+    "misty": ["Weezing-Galar", "Misty Surge support"],
+}
+MODE_PAYOFF_EXAMPLES = {
+    "sun": ["Flutter Mane with Protosynthesis", "Lilligant with Chlorophyll", "Solar Beam users"],
+    "rain": ["Ludicolo with Swift Swim", "Kingdra with Swift Swim", "Thunder or Hurricane users"],
+    "sand": ["Excadrill with Sand Rush", "Lycanroc with Sand Rush", "Rock Slide pressure"],
+    "snow": ["Cetitan with Slush Rush", "Aurora Veil support", "Blizzard pressure"],
+    "electric": ["Iron Hands with Quark Drive", "Iron Bundle with Quark Drive", "Rising Voltage users"],
+    "grassy": ["Rillaboom with Grassy Glide", "Ogerpon-W", "Bulky Earthquake partners"],
+    "psychic": ["Armarouge with Expanding Force", "Hatterene with Expanding Force"],
+    "misty": ["Misty Explosion lines", "status-resistant setup sweepers"],
+}
+TYPE_PATCH_EXAMPLES = {
+    "Grass": ["Incineroar", "Amoonguss", "Tera Fire on a key pivot"],
+    "Electric": ["Landorus-Therian", "Raging Bolt", "Tera Ground on a support slot"],
+    "Ground": ["Ogerpon-Wellspring", "Amoonguss", "Tera Flying on a key pivot"],
+    "Water": ["Rillaboom", "Ogerpon-Wellspring", "Gastrodon"],
+    "Fire": ["Pelipper", "Urshifu-Rapid-Strike", "Tera Water on a pivot"],
+    "Ice": ["Incineroar", "Heatran", "Tera Steel on a frail attacker"],
+    "Fairy": ["Gholdengo", "Heatran", "Amoonguss with Sludge Bomb support"],
+    "Dragon": ["Flutter Mane", "Tera Fairy on a pivot", "Ice coverage like Icy Wind"],
+}
+SUPPORTED_SPEED_CONTROL_EXAMPLES = [
+    "Flutter Mane with Icy Wind",
+    "Tornadus or Whimsicott with Tailwind",
+    "Farigiraf or Cresselia with Trick Room",
+    "Thundurus or Grimmsnarl with Thunder Wave",
+]
+SUPPORT_AXIS_EXAMPLES = [
+    "Incineroar or Iron Hands for Fake Out",
+    "Amoonguss or Clefairy for redirection",
+    "Incineroar or Landorus-Therian for Intimidate",
+]
+PROTECT_EXAMPLES = [
+    "Protect on Flutter Mane, Gholdengo, or Pelipper",
+    "Detect on Urshifu variants",
+]
+SPREAD_PRESSURE_EXAMPLES = [
+    "Heat Wave from Torkoal or Chi-Yu",
+    "Dazzling Gleam from Flutter Mane",
+    "Muddy Water from Pelipper or Kyogre",
+    "Rock Slide from Landorus-Therian",
+]
+PIVOT_EXAMPLES = [
+    "Parting Shot on Incineroar",
+    "U-turn on Rillaboom or Landorus-Therian",
+    "Volt Switch on Rotom or Miraidon",
+    "Flip Turn on Urshifu-Rapid-Strike",
+]
 SPREAD_MOVES = {
     "Heat Wave",
     "Rock Slide",
@@ -525,6 +582,10 @@ def _build_notes(
             severity="high",
             confidence=95,
             evidence=["No recognized speed-control moves or role tags were detected."],
+            suggested_fix=_with_examples(
+                "Add a real turn-order layer so the team can stabilize fast boards.",
+                SUPPORTED_SPEED_CONTROL_EXAMPLES,
+            ),
         )
 
     if flags["fake_out_count"] or flags["redirection_count"] or flags["intimidate_count"]:
@@ -538,6 +599,10 @@ def _build_notes(
             severity="medium",
             confidence=88,
             evidence=["No Fake Out, Intimidate, or redirection support was detected."],
+            suggested_fix=_with_examples(
+                "Add one dependable support axis so neutral openings are less fragile.",
+                SUPPORT_AXIS_EXAMPLES,
+            ),
         )
 
     if shared_weaknesses:
@@ -558,7 +623,10 @@ def _build_notes(
                 f"{support_count} members currently resist or ignore {primary.type}.",
             ],
             affected_members=affected_members,
-            suggested_fix=f"Add another {primary.type} resistance, immunity, or defensive tera plan before relying on this shell into common pressure.",
+            suggested_fix=_with_examples(
+                f"Add another {primary.type} resistance, immunity, or defensive tera plan before relying on this shell into common pressure.",
+                TYPE_PATCH_EXAMPLES.get(primary.type, [f"Tera options that patch {primary.type} pressure", "a naturally resistant pivot"]),
+            ),
         )
     else:
         strengths.append("No major multi-member weakness stack showed up in the current type profile.")
@@ -573,6 +641,10 @@ def _build_notes(
             confidence=84,
             evidence=[f"{flags['protect_count']} of {len(filled_members)} filled members currently carry Protect or Detect."],
             affected_members=_members_missing_guard(filled_members),
+            suggested_fix=_with_examples(
+                "Raise the Protect count so you have more flexible positioning turns.",
+                PROTECT_EXAMPLES,
+            ),
         )
     else:
         strengths.append("Protect usage is healthy enough to support positioning-heavy turns.")
@@ -585,6 +657,10 @@ def _build_notes(
             severity="low",
             confidence=72,
             evidence=["No recognized spread-pressure move was detected."],
+            suggested_fix=_with_examples(
+                "Add one spread-damage threat so winning board states convert into cleaner closes.",
+                SPREAD_PRESSURE_EXAMPLES,
+            ),
         )
     else:
         strengths.append("The team already shows at least one spread-damage option for board compression.")
@@ -599,6 +675,10 @@ def _build_notes(
             severity="medium",
             confidence=82,
             evidence=["Only one primary speed-control signal was detected across the current six."],
+            suggested_fix=_with_examples(
+                "Layer a backup speed-control option so one disrupted piece does not collapse the plan.",
+                SUPPORTED_SPEED_CONTROL_EXAMPLES,
+            ),
         )
 
     if flags["pivot_count"] == 0:
@@ -609,6 +689,10 @@ def _build_notes(
             severity="low",
             confidence=70,
             evidence=["No pivot move was detected."],
+            suggested_fix=_with_examples(
+                "Add one pivot tool so bad boards can be reset without fully hard-switching.",
+                PIVOT_EXAMPLES,
+            ),
         )
 
     if not recommendation_candidates:
@@ -644,6 +728,12 @@ def _speed_control_detail(flags: dict[str, object]) -> str:
     if weather_speed_control_count > 0:
         return "The team has turn-order pressure through conventional tools and weather-enabled speed packages."
     return "The team has at least one credible way to manipulate turn order."
+
+
+def _with_examples(message: str, examples: list[str]) -> str:
+    if not examples:
+        return message
+    return f"{message} Examples: {', '.join(examples[:4])}."
 
 
 def _append_mode_notes(
@@ -695,6 +785,10 @@ def _append_mode_notes(
                 severity="medium",
                 confidence=84,
                 evidence=[f"{setter_count} setter(s) found for {WEATHER_LABELS[weather]} but no clear payoff piece was detected."],
+                suggested_fix=_with_examples(
+                    f"If you keep {WEATHER_LABELS[weather]}, add clearer payoffs that actually convert the field effect into pressure.",
+                    MODE_PAYOFF_EXAMPLES.get(weather, []),
+                ),
             )
 
     for weather, payoff_count in flags["weather_needs_support"].items():
@@ -708,6 +802,10 @@ def _append_mode_notes(
             severity="high",
             confidence=90,
             evidence=[f"{payoff_count} {WEATHER_LABELS[weather]} payoff piece(s) were detected without a matching setter."],
+            suggested_fix=_with_examples(
+                f"Either add a dependable {WEATHER_LABELS[weather]} setter or trim the unsupported payoff pieces so the mode stops floating.",
+                MODE_SETTER_EXAMPLES.get(weather, []),
+            ),
         )
 
     for terrain, setter_count in flags["terrain_setters"].items():
@@ -725,6 +823,10 @@ def _append_mode_notes(
                 severity="medium",
                 confidence=80,
                 evidence=[f"{setter_count} setter(s) found for {WEATHER_LABELS[terrain]} but no clear payoff piece was detected."],
+                suggested_fix=_with_examples(
+                    f"If you keep {WEATHER_LABELS[terrain]}, add payoffs that actually leverage the field effect.",
+                    MODE_PAYOFF_EXAMPLES.get(terrain, []),
+                ),
             )
 
     for terrain, payoff_count in flags["terrain_needs_support"].items():
@@ -738,6 +840,10 @@ def _append_mode_notes(
             severity="medium",
             confidence=86,
             evidence=[f"{payoff_count} {WEATHER_LABELS[terrain]} payoff piece(s) were detected without a matching setter."],
+            suggested_fix=_with_examples(
+                f"Either add a dependable {WEATHER_LABELS[terrain]} setter or cut the unsupported payoff pieces.",
+                MODE_SETTER_EXAMPLES.get(terrain, []),
+            ),
         )
 
     if flags["trick_room_count"] > 0 and flags["trick_room_payoff_count"] > 0:
@@ -753,6 +859,10 @@ def _append_mode_notes(
             severity="medium",
             confidence=82,
             evidence=["Trick Room was detected, but few obvious slow-mode payoff pieces were found."],
+            suggested_fix=_with_examples(
+                "If Trick Room is part of the identity, add payoff pieces that really exploit reverse-speed turns.",
+                ["Ursaluna-Bloodmoon", "Torkoal", "Iron Hands", "Amoonguss"],
+            ),
         )
     elif flags["trick_room_payoff_count"] >= 2:
         warnings.append("Several members look like Trick Room payoffs, but no reliable setter was detected.")
@@ -763,6 +873,10 @@ def _append_mode_notes(
             severity="high",
             confidence=92,
             evidence=[f"{flags['trick_room_payoff_count']} likely Trick Room payoff pieces were detected without a setter."],
+            suggested_fix=_with_examples(
+                "Add a dedicated Trick Room setter or trim the slow pieces that depend on it.",
+                ["Farigiraf", "Cresselia", "Porygon2", "Indeedee-F plus setter support"],
+            ),
         )
 
     if flags["weather_setters"] and flags["terrain_setters"]:
