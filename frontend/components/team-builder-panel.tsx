@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { updateTeam, validateShowdownTeam } from "@/lib/api";
 import { ChipListInput } from "@/components/chip-list-input";
-import { getPokemonImageUrl, getSmogonDexUrl, getSmogonSearchUrl, normalizePokemonSlot } from "@/lib/pokemon";
+import {
+  getPokemonImageUrl,
+  getPokemonSpeciesAliasHint,
+  getPokemonSpeciesIdentity,
+  getSmogonDexUrl,
+  getSmogonSearchUrl,
+  normalizePokemonSlot
+} from "@/lib/pokemon";
 import { PokemonSlot, ShowdownValidation, Team } from "@/lib/types";
 
 const emptyMember = (): PokemonSlot => ({
@@ -46,10 +53,10 @@ function validateMember(member: PokemonSlot, allMembers: PokemonSlot[]): string[
     issues.push("Use at most 4 moves.");
   }
 
-  const normalizedName = member.name.trim().toLowerCase();
-  if (normalizedName) {
+  const speciesIdentity = getPokemonSpeciesIdentity(member.name);
+  if (speciesIdentity) {
     const duplicateCount = allMembers.filter(
-      (candidate) => candidate.name.trim().toLowerCase() === normalizedName
+      (candidate) => getPokemonSpeciesIdentity(candidate.name) === speciesIdentity
     ).length;
 
     if (duplicateCount > 1) {
@@ -222,6 +229,7 @@ export function TeamBuilderPanel({ team }: { team: Team }) {
         {members.map((member, index) => (
           (() => {
             const memberIssues = validateMember(member, members);
+            const speciesAliasHint = getPokemonSpeciesAliasHint(member.name);
 
             return (
           <article
@@ -299,6 +307,9 @@ export function TeamBuilderPanel({ team }: { team: Team }) {
                   placeholder="Flutter Mane"
                   value={member.name}
                 />
+                {speciesAliasHint ? (
+                  <p className="mt-2 text-xs text-[var(--on-surface-variant)]">{speciesAliasHint}</p>
+                ) : null}
               </label>
 
               <label className="block">

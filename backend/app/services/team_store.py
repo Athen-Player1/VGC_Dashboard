@@ -16,18 +16,39 @@ from app.models.schemas import (
 )
 
 
-SPECIAL_IMAGE_SLUGS = {
-    "Ogerpon-W": "ogerpon-wellspring",
-    "Bloodmoon Ursaluna": "ursaluna-bloodmoon",
-    "Landorus": "landorus-therian",
+SPECIES_IMAGE_SLUGS = {
+    "ogerpon-w": "ogerpon-wellspring",
+    "ogerpon-h": "ogerpon-hearthflame",
+    "ogerpon-c": "ogerpon-cornerstone",
+    "bloodmoon ursaluna": "ursaluna-bloodmoon",
+    "ursaluna bloodmoon": "ursaluna-bloodmoon",
+    "landorus": "landorus-therian",
+    "landorus-t": "landorus-therian",
 }
 
 SHOWDOWN_ENGINE_URL = os.getenv("SHOWDOWN_ENGINE_URL", "http://showdown-engine:3100")
 
 
+def _species_key(name: str) -> str:
+    slug = name.lower().strip()
+    slug = slug.replace(".", "")
+    slug = slug.replace("'", "")
+    slug = slug.replace("♀", "-f")
+    slug = slug.replace("♂", "-m")
+    slug = re.sub(r"[_\s]+", " ", slug).strip()
+    slug = re.sub(r"[^a-z0-9 -]+", "", slug)
+    return slug
+
+
+def _species_identity(name: str) -> str:
+    key = _species_key(name)
+    return SPECIES_IMAGE_SLUGS.get(key, _slugify_species(name))
+
+
 def _slugify_species(name: str) -> str:
-    if name in SPECIAL_IMAGE_SLUGS:
-        return SPECIAL_IMAGE_SLUGS[name]
+    key = _species_key(name)
+    if key in SPECIES_IMAGE_SLUGS:
+        return SPECIES_IMAGE_SLUGS[key]
 
     slug = name.lower()
     slug = slug.replace(".", "")
@@ -110,7 +131,7 @@ def _normalize_member(member: TeamMemberInput | dict[str, Any]) -> dict[str, Any
         "moves": [item.strip() for item in payload.get("moves", []) if item.strip()],
         "role": (payload.get("role") or "").strip(),
         "teraType": payload.get("teraType"),
-        "image": (payload.get("image") or _image_for_species(name)).strip(),
+        "image": _image_for_species(name) if name else "",
     }
 
 

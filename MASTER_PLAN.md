@@ -53,6 +53,7 @@ Build a Dockerized web app for Pokemon VGC that lets a user:
 - Frontend linting is now wired through ESLint and passes in Docker
 - Backend smoke tests now run through pytest and pass in Docker
 - The app now starts with an empty saved-team workspace so handoff users begin from a blank builder instead of seeded demo teams
+- Builder species/form handling now normalizes common aliases more safely for duplicate checks and sprite refreshes
 
 ### In Progress
 
@@ -138,6 +139,7 @@ Progress:
 - chip-style move/type editing is live
 - dynamic sprite previews are live
 - first-pass validation is live
+- common form aliases now resolve more consistently during builder editing and save flows
 
 ## Phase 3: Analysis Engine
 
